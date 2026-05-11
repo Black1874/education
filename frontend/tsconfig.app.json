@@ -3,6 +3,16 @@
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "types": ["vite/client"],
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@block1/*": ["./src/modules/block1/*"],
+      "@common/*": ["./src/modules/common/*"],
+      "@api/*": ["./src/api/*"],
+      "@stores/*": ["./src/stores/*"],
+      "@assets/*": ["./src/assets/*"]
+    },
 
     /* Linting */
     "noUnusedLocals": true,

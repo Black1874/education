@@ -25,14 +25,30 @@
 
       <!-- 两个大入口 -->
       <div class="entrance-cards">
-        <div class="entrance-card learning-card" @click="goToLearning">
+        <div
+          class="entrance-card learning-card"
+          role="button"
+          tabindex="0"
+          aria-label="进入学习乐园"
+          @click="goToLearning"
+          @keydown.enter.prevent="goToLearning"
+          @keydown.space.prevent="goToLearning"
+        >
           <div class="card-icon">📚</div>
           <h3 class="card-title">学习乐园</h3>
           <p class="card-desc">认识动物、水果、颜色...</p>
           <div class="card-badge">8个主题</div>
         </div>
 
-        <div class="entrance-card game-card" @click="goToGames">
+        <div
+          class="entrance-card game-card"
+          role="button"
+          tabindex="0"
+          aria-label="进入游戏世界"
+          @click="goToGames"
+          @keydown.enter.prevent="goToGames"
+          @keydown.space.prevent="goToGames"
+        >
           <div class="card-icon">🎮</div>
           <h3 class="card-title">游戏世界</h3>
           <p class="card-desc">记忆、拼图、找不同...</p>
@@ -369,6 +385,391 @@ const feedPet = () => {
   }
   50% {
     transform: translateY(-10px);
+  }
+}
+
+// 首页移动端/平板单屏兼容
+.home-page {
+  position: relative;
+  overflow-x: hidden;
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 12% 14%, rgba(255, 214, 228, 0.9) 0 90px, transparent 92px),
+    radial-gradient(circle at 88% 18%, rgba(194, 232, 255, 0.85) 0 110px, transparent 112px),
+    linear-gradient(135deg, #FFF8E7 0%, #FFEAF3 45%, #EAF7FF 100%);
+}
+
+.header {
+  margin: max(12px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) 0 max(14px, env(safe-area-inset-left));
+  padding: 16px 24px;
+  border: 4px solid rgba(255, 255, 255, 0.78);
+  border-radius: 32px;
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 14px 36px rgba(255, 160, 190, 0.18);
+  backdrop-filter: blur(10px);
+
+  .logo {
+    color: #4A5F7A;
+    text-shadow: 0 3px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  .star-count,
+  .user-avatar {
+    min-height: 56px;
+    border-radius: 999px;
+  }
+}
+
+.main-content {
+  padding: 28px max(20px, env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+}
+
+.welcome-section {
+  margin-bottom: 26px;
+
+  .welcome-text {
+    font-size: clamp(34px, 5vw, 48px);
+    line-height: 1.18;
+  }
+
+  .welcome-subtitle {
+    font-size: clamp(20px, 3vw, 24px);
+  }
+}
+
+.entrance-cards {
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.entrance-card {
+  min-height: 260px;
+  padding: 36px 28px;
+  border: 5px solid rgba(255, 255, 255, 0.82);
+  border-radius: 38px;
+  box-shadow: inset 0 -10px 0 rgba(255, 255, 255, 0.28), 0 18px 38px rgba(116, 139, 170, 0.16);
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+
+  &:focus-visible {
+    box-shadow: inset 0 -10px 0 rgba(255, 255, 255, 0.34), 0 0 0 6px rgba(255, 183, 77, 0.34), 0 22px 46px rgba(116, 139, 170, 0.2);
+  }
+
+  .card-icon {
+    font-size: clamp(78px, 10vw, 112px);
+    margin-bottom: 14px;
+  }
+
+  .card-title {
+    font-size: clamp(30px, 4vw, 36px);
+    margin-bottom: 8px;
+  }
+
+  .card-desc {
+    margin-bottom: 14px;
+  }
+}
+
+.pet-card {
+  border: 4px solid rgba(255, 255, 255, 0.82);
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 14px 30px rgba(116, 139, 170, 0.14);
+}
+
+@media (max-width: 1024px) {
+  .header {
+    padding: 12px 18px;
+  }
+
+  .main-content {
+    max-width: 100%;
+    padding-top: 22px;
+  }
+
+  .entrance-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .entrance-card {
+    min-height: 210px;
+    padding: 28px 18px;
+
+    .card-desc {
+      display: none;
+    }
+  }
+
+  .pet-card {
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 20px 24px;
+
+    .pet-avatar {
+      font-size: 58px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 26px;
+
+    .logo {
+      max-width: 180px;
+      overflow: hidden;
+      font-size: 22px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .header-right {
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .star-count {
+      min-height: 46px;
+      padding: 8px 12px;
+      font-size: 16px;
+
+      .star-icon {
+        font-size: 20px;
+      }
+    }
+
+    .user-avatar {
+      width: 46px;
+      height: 46px;
+      font-size: 24px;
+    }
+  }
+
+  .main-content {
+    padding: 16px 12px calc(14px + env(safe-area-inset-bottom));
+  }
+
+  .welcome-section {
+    margin-bottom: 14px;
+
+    .welcome-text {
+      font-size: 28px;
+      margin-bottom: 4px;
+    }
+
+    .welcome-subtitle {
+      font-size: 17px;
+    }
+  }
+
+  .entrance-cards {
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .entrance-card {
+    min-height: 150px;
+    padding: 18px 10px 14px;
+    border-radius: 28px;
+
+    .card-icon {
+      font-size: 54px;
+      margin-bottom: 6px;
+    }
+
+    .card-title {
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+
+    .card-badge {
+      padding: 4px 10px;
+      font-size: 12px;
+    }
+  }
+
+  .pet-card {
+    padding: 12px 14px;
+    gap: 10px;
+
+    .pet-avatar {
+      font-size: 42px;
+    }
+
+    .pet-info h4 {
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+    .pet-info .pet-status {
+      gap: 2px;
+      font-size: 12px;
+      line-height: 1.3;
+    }
+
+    .btn-feed {
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 15px;
+      white-space: nowrap;
+    }
+  }
+}
+
+@media (max-width: 380px) and (max-height: 700px) {
+  .header .logo {
+    max-width: 150px;
+    font-size: 20px;
+  }
+
+  .welcome-section {
+    display: none;
+  }
+
+  .entrance-card {
+    min-height: 132px;
+
+    .card-icon {
+      font-size: 46px;
+    }
+
+    .card-title {
+      font-size: 20px;
+    }
+  }
+
+  .pet-card {
+    padding: 10px 12px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .header {
+    padding-top: 8px;
+    padding-bottom: 8px;
+
+    .logo {
+      font-size: 24px;
+    }
+  }
+
+  .main-content {
+    padding-top: 14px;
+  }
+
+  .welcome-section {
+    display: none;
+  }
+
+  .entrance-card {
+    min-height: 150px;
+    padding: 18px 12px;
+
+    .card-icon {
+      font-size: 52px;
+    }
+  }
+
+  .pet-card {
+    padding: 12px 18px;
+
+    .pet-avatar {
+      font-size: 42px;
+    }
+  }
+}
+
+@media (orientation: landscape) and (min-width: 900px) and (max-height: 820px) {
+  .header {
+    padding-top: 10px;
+    padding-bottom: 10px;
+
+    .logo {
+      font-size: 26px;
+    }
+
+    .star-count,
+    .user-avatar {
+      min-height: 48px;
+    }
+
+    .user-avatar {
+      width: 48px;
+      height: 48px;
+      font-size: 26px;
+    }
+  }
+
+  .main-content {
+    padding-top: 18px;
+    padding-bottom: calc(14px + env(safe-area-inset-bottom));
+  }
+
+  .welcome-section {
+    margin-bottom: 16px;
+
+    .welcome-text {
+      font-size: 34px;
+      margin-bottom: 4px;
+    }
+
+    .welcome-subtitle {
+      font-size: 18px;
+    }
+  }
+
+  .entrance-cards {
+    gap: 18px;
+    margin-bottom: 16px;
+  }
+
+  .entrance-card {
+    min-height: 190px;
+    padding: 24px 18px;
+
+    .card-icon {
+      font-size: 70px;
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-size: 28px;
+      margin-bottom: 6px;
+    }
+
+    .card-desc {
+      display: none;
+    }
+  }
+
+  .pet-card {
+    max-width: 520px;
+    padding: 14px 18px;
+
+    .pet-avatar {
+      font-size: 44px;
+    }
+
+    .pet-info h4 {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+
+    .pet-info .pet-status {
+      flex-direction: row;
+      gap: 12px;
+      font-size: 13px;
+    }
+
+    .btn-feed {
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 16px;
+    }
   }
 }
 </style>

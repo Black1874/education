@@ -74,13 +74,12 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { storageManager } from '@/modules/common/utils/storage'
 import { audioManager } from '@/modules/common/utils/audio'
 import { toast } from '@/modules/common/utils/toast'
 
 const router = useRouter()
-const route = useRoute()
 
 // 类别信息
 const categoryInfo = ref({

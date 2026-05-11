@@ -8,7 +8,7 @@
       <h1 class="page-title">游戏世界</h1>
       <div class="star-count">
         <span class="star-icon">⭐</span>
-        <span class="count">120</span>
+        <span class="count">{{ totalStars }}</span>
       </div>
     </header>
 
@@ -19,7 +19,12 @@
           :key="game.id"
           class="game-card"
           :style="{ background: game.color }"
+          role="button"
+          tabindex="0"
+          :aria-label="`进入${game.name}`"
           @click="goToGame(game.id)"
+          @keydown.enter.prevent="goToGame(game.id)"
+          @keydown.space.prevent="goToGame(game.id)"
         >
           <div class="card-icon">{{ game.emoji }}</div>
           <h3 class="card-title">{{ game.name }}</h3>
@@ -32,11 +37,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { audioManager } from '@/modules/common/utils/audio'
+import { storageManager } from '@/modules/common/utils/storage'
 
 const router = useRouter()
+const totalStars = ref(0)
+
+onMounted(() => {
+  totalStars.value = storageManager.getUserData().totalStars
+})
 
 const games = ref([
   {
@@ -218,6 +229,250 @@ const goToGame = (gameId: string) => {
     font-size: 16px;
     font-weight: bold;
     color: #2C3E50;
+  }
+}
+
+// 游戏列表单屏兼容：与学习乐园保持一致的大触控卡片
+.game-list-page {
+  position: relative;
+  overflow-x: hidden;
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 12% 14%, rgba(255, 214, 228, 0.9) 0 90px, transparent 92px),
+    radial-gradient(circle at 88% 18%, rgba(194, 232, 255, 0.85) 0 110px, transparent 112px),
+    linear-gradient(135deg, #FFF8E7 0%, #FFEAF3 45%, #EAF7FF 100%);
+}
+
+.header {
+  margin: max(12px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) 0 max(14px, env(safe-area-inset-left));
+  padding: 18px 28px;
+  border: 4px solid rgba(255, 255, 255, 0.78);
+  border-radius: 32px;
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 14px 36px rgba(255, 160, 190, 0.18);
+  backdrop-filter: blur(10px);
+
+  .btn-back,
+  .star-count {
+    min-height: 64px;
+    border-radius: 999px;
+  }
+
+  .btn-back {
+    background: linear-gradient(135deg, #FFFFFF, #F3FBFF);
+    color: #4B6175;
+    box-shadow: inset 0 -4px 0 rgba(93, 173, 226, 0.12), 0 8px 18px rgba(93, 173, 226, 0.14);
+  }
+
+  .page-title {
+    color: #4A5F7A;
+    text-shadow: 0 3px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  .star-count {
+    box-shadow: inset 0 -5px 0 rgba(255, 140, 0, 0.2), 0 10px 22px rgba(255, 190, 60, 0.28);
+  }
+}
+
+.main-content {
+  max-width: 1400px;
+  padding: 42px max(20px, env(safe-area-inset-right)) calc(40px + env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+}
+
+.game-grid {
+  gap: 24px;
+}
+
+.game-card {
+  min-height: 260px;
+  padding: 40px 28px 32px;
+  border: 5px solid rgba(255, 255, 255, 0.82);
+  border-radius: 38px;
+  box-shadow: inset 0 -10px 0 rgba(255, 255, 255, 0.28), 0 18px 38px rgba(116, 139, 170, 0.16);
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+
+  &:focus-visible {
+    box-shadow: inset 0 -10px 0 rgba(255, 255, 255, 0.34), 0 0 0 6px rgba(255, 183, 77, 0.34), 0 22px 46px rgba(116, 139, 170, 0.2);
+  }
+
+  .card-icon {
+    font-size: 82px;
+    margin-bottom: 14px;
+    filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.08));
+  }
+
+  .card-title {
+    color: #4A5F7A;
+    font-size: 30px;
+    margin-bottom: 8px;
+  }
+
+  .card-desc {
+    color: #6F8299;
+    margin-bottom: 14px;
+  }
+
+  .card-levels {
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.72);
+    color: #4A5F7A;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 1024px) {
+  .header {
+    padding: 12px 18px;
+  }
+
+  .main-content {
+    max-width: 100%;
+    padding-top: 24px;
+  }
+
+  .game-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .game-card {
+    min-height: 190px;
+    padding: 28px 12px 20px;
+
+    .card-icon {
+      font-size: 58px;
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+
+    .card-desc {
+      display: none;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 26px;
+
+    .btn-back,
+    .star-count {
+      min-height: 46px;
+      padding: 8px 12px;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .page-title {
+      flex: 1;
+      overflow: hidden;
+      font-size: 26px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .main-content {
+    padding: 18px 12px calc(16px + env(safe-area-inset-bottom));
+  }
+
+  .game-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .game-card {
+    min-height: 128px;
+    padding: 14px 8px 10px;
+    border-radius: 26px;
+    line-height: 1.15;
+
+    .card-icon {
+      font-size: 40px;
+      line-height: 1;
+      margin-bottom: 5px;
+    }
+
+    .card-title {
+      margin-bottom: 4px;
+      font-size: 17px;
+      line-height: 1.12;
+    }
+
+    .card-desc {
+      display: none;
+    }
+
+    .card-levels {
+      padding: 3px 8px;
+      font-size: 11px;
+      line-height: 1.1;
+    }
+  }
+}
+
+@media (max-width: 380px) and (max-height: 700px) {
+  .header {
+    margin-top: 8px;
+
+    .page-title {
+      font-size: 22px;
+    }
+  }
+
+  .main-content {
+    padding-top: 14px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+
+  .game-card {
+    min-height: 106px;
+    padding-top: 10px;
+
+    .card-icon {
+      font-size: 32px;
+    }
+
+    .card-title {
+      font-size: 15px;
+    }
+  }
+}
+
+@media (orientation: landscape) and (min-width: 900px) and (max-height: 820px) {
+  .header {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .main-content {
+    padding-top: 24px;
+  }
+
+  .game-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .game-card {
+    min-height: 210px;
+    padding: 28px 18px 22px;
+
+    .card-icon {
+      font-size: 66px;
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-size: 24px;
+    }
   }
 }
 </style>

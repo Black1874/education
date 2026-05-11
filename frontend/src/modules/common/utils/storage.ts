@@ -22,6 +22,7 @@ interface UserData {
   petHappiness: number
   lastLoginAt: string
   favorites: number[]
+  learnedContents: number[]
   achievements: string[]
   progress: {
     [gameId: string]: UserProgress
@@ -42,7 +43,7 @@ class StorageManager {
         const parsed = JSON.parse(data)
         // 检查版本兼容性
         if (parsed.version === this.VERSION) {
-          return parsed.data
+          return this.normalizeData(parsed.data)
         }
       }
     } catch (error) {
@@ -87,8 +88,24 @@ class StorageManager {
       petHappiness: 100,
       lastLoginAt: new Date().toISOString(),
       favorites: [],
+      learnedContents: [],
       achievements: [],
       progress: {}
+    }
+  }
+
+  /**
+   * 补齐旧版本本地数据缺失字段
+   */
+  private normalizeData(data: Partial<UserData>): UserData {
+    const defaultData = this.getDefaultData()
+    return {
+      ...defaultData,
+      ...data,
+      favorites: data.favorites || [],
+      learnedContents: data.learnedContents || [],
+      achievements: data.achievements || [],
+      progress: data.progress || {}
     }
   }
 
@@ -245,6 +262,28 @@ class StorageManager {
   isFavorite(contentId: number): boolean {
     const data = this.getUserData()
     return data.favorites.includes(contentId)
+  }
+
+  /**
+   * 标记学习内容已学习，首次学习返回 true
+   */
+  markContentLearned(contentId: number): boolean {
+    const data = this.getUserData()
+    if (data.learnedContents.includes(contentId)) {
+      return false
+    }
+
+    data.learnedContents.push(contentId)
+    this.saveUserData(data)
+    return true
+  }
+
+  /**
+   * 检查学习内容是否已学习
+   */
+  isContentLearned(contentId: number): boolean {
+    const data = this.getUserData()
+    return data.learnedContents.includes(contentId)
   }
 
   /**

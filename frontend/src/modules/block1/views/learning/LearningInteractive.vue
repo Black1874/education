@@ -23,7 +23,12 @@
           v-for="mode in learningModes"
           :key="mode.id"
           class="mode-card"
+          role="button"
+          tabindex="0"
+          :aria-label="`选择${mode.name}`"
           @click="selectMode(mode.id)"
+          @keydown.enter.prevent="selectMode(mode.id)"
+          @keydown.space.prevent="selectMode(mode.id)"
         >
           <div class="mode-icon">{{ mode.icon }}</div>
           <h3 class="mode-name">{{ mode.name }}</h3>
@@ -91,7 +96,7 @@
       <div v-else-if="selectedMode === 'matching'" class="matching-mode">
         <!-- 记忆阶段 - 展示所有卡片 -->
         <div v-if="matchingPhase === 'memorize'" class="memorize-phase">
-          <h2 class="phase-title">记住它们的位置</h2>
+          <h2 class="phase-title">第 {{ challengeRound }} 轮：记住它们的位置</h2>
           <div class="countdown">{{ memorizeCountdown }}秒</div>
           <div class="matching-grid preview">
             <div
@@ -109,6 +114,7 @@
         <!-- 游戏阶段 -->
         <div v-else class="game-phase">
           <div class="game-info">
+            <div class="round">第 {{ challengeRound }} 轮</div>
             <div class="score">得分: {{ gameScore }}</div>
             <div class="timer">时间: {{ gameTime }}s</div>
           </div>
@@ -133,8 +139,10 @@
       <!-- 快速识别模式 -->
       <div v-else-if="selectedMode === 'quick'" class="quick-mode">
         <div class="game-info">
+          <div class="round">第 {{ challengeRound }} 轮</div>
           <div class="score">得分: {{ gameScore }}</div>
           <div class="combo">连击: {{ combo }}x</div>
+          <div class="progress">题目: {{ questionCount }}/{{ maxQuestionCount }}</div>
         </div>
 
         <div class="question-area">
@@ -149,9 +157,18 @@
               v-for="option in quickOptions"
               :key="option.id"
               class="option-card"
+              :class="getOptionClass(option)"
+              role="button"
+              tabindex="0"
+              :aria-label="`选择${option.name}`"
               @click="selectOption(option)"
+              @keydown.enter.prevent="selectOption(option)"
+              @keydown.space.prevent="selectOption(option)"
             >
               <img :src="option.imageUrl" :alt="option.name" />
+              <div v-if="selectedOptionId === option.id" class="answer-badge">
+                {{ option.id === targetContent?.id ? '真棒' : '再试试' }}
+              </div>
             </div>
           </div>
         </div>
@@ -160,7 +177,9 @@
       <!-- 听声辨物模式 -->
       <div v-else-if="selectedMode === 'sound'" class="sound-mode">
         <div class="game-info">
+          <div class="round">第 {{ challengeRound }} 轮</div>
           <div class="score">得分: {{ gameScore }}</div>
+          <div class="progress">题目: {{ questionCount }}/{{ maxQuestionCount }}</div>
         </div>
 
         <div class="sound-game">
@@ -188,16 +207,33 @@
               v-for="option in quickOptions"
               :key="option.id"
               class="option-card"
+              :class="getOptionClass(option)"
+              role="button"
+              tabindex="0"
+              :aria-label="`选择${option.name}`"
               @click="selectOption(option)"
+              @keydown.enter.prevent="selectOption(option)"
+              @keydown.space.prevent="selectOption(option)"
             >
               <img :src="option.imageUrl" :alt="option.name" />
+              <div v-if="selectedOptionId === option.id" class="answer-badge">
+                {{ option.id === targetContent?.id ? '真棒' : '再试试' }}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
+      <div v-if="transitionMessage" class="level-transition">
+        <div class="transition-card">
+          <div class="transition-icon">{{ transitionIcon }}</div>
+          <h2>{{ transitionMessage }}</h2>
+          <p>{{ transitionSubMessage }}</p>
+        </div>
+      </div>
+
       <!-- 模式切换按钮 -->
-      <button class="change-mode-btn" @click="selectedMode = null">
+      <button class="change-mode-btn" @click="changeMode">
         🔄 切换模式
       </button>
     </main>
@@ -450,6 +486,97 @@ const initFavorites = () => {
   })
 }
 
+// 自由探索模式
+const currentIndex = ref(0)
+const currentContent = computed(() => filteredContents.value[currentIndex.value])
+const filteredContents = computed(() => contents.value)
+const isAutoPlay = ref(false)
+let autoPlayTimer: any = null
+
+// 游戏数据
+const gameScore = ref(0)
+const gameTime = ref(0)
+const combo = ref(0)
+const matchingCards = ref<any[]>([])
+const matchingPhase = ref<'memorize' | 'game'>('memorize')
+const memorizeCountdown = ref(10)
+const quickOptions = ref<any[]>([])
+const targetName = ref('')
+const targetContent = ref<any>(null)
+const questionCount = ref(0)
+const maxQuestionCount = 5
+const isAnswerLocked = ref(false)
+const selectedOptionId = ref<number | null>(null)
+const challengeRound = ref(1)
+const transitionMessage = ref('')
+const transitionSubMessage = ref('')
+const transitionIcon = ref('🎉')
+let gameTimer: any = null
+let memorizeTimer: any = null
+let delayedActionTimer: any = null
+let flippedCards: any[] = []
+
+onMounted(() => {
+  loadUserData()
+  initFavorites()
+})
+
+onUnmounted(() => {
+  cleanupTimers()
+})
+
+const cleanupTimers = () => {
+  if (gameTimer) {
+    clearInterval(gameTimer)
+    gameTimer = null
+  }
+  if (memorizeTimer) {
+    clearInterval(memorizeTimer)
+    memorizeTimer = null
+  }
+  if (autoPlayTimer) {
+    clearInterval(autoPlayTimer)
+    autoPlayTimer = null
+  }
+  if (delayedActionTimer) {
+    clearTimeout(delayedActionTimer)
+    delayedActionTimer = null
+  }
+  isAutoPlay.value = false
+}
+
+const clearTransition = () => {
+  transitionMessage.value = ''
+  transitionSubMessage.value = ''
+  transitionIcon.value = '🎉'
+}
+
+const showTransition = (message: string, subMessage: string, icon = '🎉') => {
+  transitionMessage.value = message
+  transitionSubMessage.value = subMessage
+  transitionIcon.value = icon
+}
+
+const resetLearningState = () => {
+  cleanupTimers()
+  currentIndex.value = 0
+  gameScore.value = 0
+  gameTime.value = 0
+  combo.value = 0
+  matchingCards.value = []
+  matchingPhase.value = 'memorize'
+  memorizeCountdown.value = 10
+  quickOptions.value = []
+  targetName.value = ''
+  targetContent.value = null
+  questionCount.value = 0
+  isAnswerLocked.value = false
+  selectedOptionId.value = null
+  challengeRound.value = 1
+  clearTransition()
+  flippedCards = []
+}
+
 // 监听路由变化，切换数据源
 watch(() => route.params.category, (newCategory) => {
   const category = newCategory as string
@@ -474,42 +601,11 @@ watch(() => route.params.category, (newCategory) => {
       contents.value = [...animalContents]
     }
     // 重置模式选择
+    resetLearningState()
     selectedMode.value = null
     initFavorites()
   }
 }, { immediate: true })
-
-// 自由探索模式
-const currentIndex = ref(0)
-const currentContent = computed(() => filteredContents.value[currentIndex.value])
-const filteredContents = computed(() => contents.value)
-const isAutoPlay = ref(false)
-let autoPlayTimer: any = null
-
-// 游戏数据
-const gameScore = ref(0)
-const gameTime = ref(0)
-const combo = ref(0)
-const matchingCards = ref<any[]>([])
-const matchingPhase = ref<'memorize' | 'game'>('memorize')
-const matchingPreview = ref<any[]>([])
-const memorizeCountdown = ref(10)
-const quickOptions = ref<any[]>([])
-const targetName = ref('')
-const targetContent = ref<any>(null)
-let gameTimer: any = null
-let memorizeTimer: any = null
-
-onMounted(() => {
-  loadUserData()
-  initFavorites()
-})
-
-onUnmounted(() => {
-  if (gameTimer) clearInterval(gameTimer)
-  if (memorizeTimer) clearInterval(memorizeTimer)
-  if (autoPlayTimer) clearInterval(autoPlayTimer)
-})
 
 const loadUserData = () => {
   const data = storageManager.getUserData()
@@ -524,6 +620,8 @@ const goBack = () => {
 
 const selectMode = (modeId: string) => {
   audioManager.playClick()
+  cleanupTimers()
+  clearTransition()
   selectedMode.value = modeId
 
   // 初始化对应模式
@@ -533,16 +631,18 @@ const selectMode = (modeId: string) => {
     initQuickGame()
   } else if (modeId === 'sound') {
     initQuickGame()
-    // 听声辨物模式：自动播放叫声
-    setTimeout(() => {
-      playTargetSound()
-    }, 500)
   } else if (modeId === 'explore') {
     // 自动播放当前内容的声音
-    setTimeout(() => {
+    delayedActionTimer = setTimeout(() => {
       playContentSound()
     }, 500)
   }
+}
+
+const changeMode = () => {
+  audioManager.playClick()
+  resetLearningState()
+  selectedMode.value = null
 }
 
 // 自由探索模式
@@ -607,8 +707,11 @@ const playContentSound = () => {
     audioManager.playSuccess()
     // 使用语音合成播放名称
     speakText(currentContent.value.name)
-    storageManager.addStars(5, `view_${currentContent.value.id}`)
-    loadUserData()
+    if (storageManager.markContentLearned(currentContent.value.id)) {
+      storageManager.addStars(5, `learn_${currentContent.value.id}`)
+      toast.success('⭐ 第一次学会啦！+5⭐')
+      loadUserData()
+    }
   }
 }
 
@@ -633,10 +736,14 @@ const toggleFavorite = () => {
 
 // 配对游戏
 const initMatchingGame = () => {
+  cleanupTimers()
+  clearTransition()
   gameScore.value = 0
   gameTime.value = 0
+  combo.value = 0
   matchingPhase.value = 'memorize'
   memorizeCountdown.value = 10
+  flippedCards = []
 
   // 随机选择4对卡片
   const shuffled = [...contents.value].sort(() => Math.random() - 0.5)
@@ -681,6 +788,8 @@ const initMatchingGame = () => {
 }
 
 const startMatchingGame = () => {
+  clearTransition()
+  if (gameTimer) clearInterval(gameTimer)
   matchingPhase.value = 'game'
 
   // 开始计时
@@ -691,8 +800,6 @@ const startMatchingGame = () => {
   // 播放语音提示
   speakText('开始配对吧')
 }
-
-let flippedCards: any[] = []
 
 const flipCard = (card: any) => {
   if (card.flipped || card.matched || flippedCards.length >= 2) return
@@ -732,24 +839,37 @@ const checkMatch = () => {
   // 检查是否全部完成
   if (matchingCards.value.every(c => c.matched)) {
     clearInterval(gameTimer)
+    gameTimer = null
     const bonus = Math.max(0, 60 - gameTime.value) * 2
     gameScore.value += bonus
     storageManager.addStars(gameScore.value, 'matching_game')
     audioManager.playSuccess()
-    speakText('完成了')
+    speakText('完成了，准备下一轮')
     toast.success(`🎉 完成！得分：${gameScore.value}，+${gameScore.value}⭐`)
     loadUserData()
+    showTransition('配对完成！', '马上进入下一轮记忆挑战', '🎴')
+    challengeRound.value++
+    delayedActionTimer = setTimeout(() => {
+      initMatchingGame()
+    }, 2200)
   }
 }
 
 // 快速识别游戏
 const initQuickGame = () => {
+  cleanupTimers()
+  clearTransition()
   gameScore.value = 0
   combo.value = 0
+  questionCount.value = 0
+  isAnswerLocked.value = false
   generateQuestion()
 }
 
 const generateQuestion = () => {
+  clearTransition()
+  isAnswerLocked.value = false
+  selectedOptionId.value = null
   // 随机选择目标
   const target = contents.value[Math.floor(Math.random() * contents.value.length)]
   targetName.value = target.name
@@ -766,9 +886,13 @@ const generateQuestion = () => {
 
   quickOptions.value = options.sort(() => Math.random() - 0.5)
 
-  // 自动播放问题语音
-  setTimeout(() => {
-    playQuestionVoice()
+  // 自动播放问题语音或目标声音
+  delayedActionTimer = setTimeout(() => {
+    if (selectedMode.value === 'sound') {
+      playTargetSound()
+    } else {
+      playQuestionVoice()
+    }
   }, 500)
 }
 
@@ -777,8 +901,19 @@ const playQuestionVoice = () => {
   speakText(`请找出${targetName.value}`)
 }
 
+const getOptionClass = (option: any) => ({
+  selected: selectedOptionId.value === option.id,
+  correct: selectedOptionId.value === option.id && option.id === targetContent.value?.id,
+  wrong: selectedOptionId.value === option.id && option.id !== targetContent.value?.id,
+  dimmed: isAnswerLocked.value && selectedOptionId.value !== option.id
+})
+
 const selectOption = (option: any) => {
+  if (isAnswerLocked.value || !targetContent.value) return
+
   audioManager.playClick()
+  isAnswerLocked.value = true
+  selectedOptionId.value = option.id
 
   if (option.id === targetContent.value.id) {
     // 答对了
@@ -788,17 +923,35 @@ const selectOption = (option: any) => {
     audioManager.playSuccess()
     speakText('答对了')
     toast.success(`✅ 正确！+${points}分`)
+    questionCount.value++
 
-    // 延迟生成下一题
-    setTimeout(() => {
-      generateQuestion()
-    }, 1500)
+    if (questionCount.value >= maxQuestionCount) {
+      const reward = Math.max(5, Math.floor(gameScore.value / 5))
+      storageManager.addStars(reward, `${selectedMode.value}_learning_game`)
+      toast.success(`🎉 挑战完成！+${reward}⭐`)
+      loadUserData()
+      showTransition('这一轮完成啦！', '准备进入下一轮挑战', '🌟')
+      speakText('这一轮完成啦，准备下一轮')
+      challengeRound.value++
+      delayedActionTimer = setTimeout(() => {
+        initQuickGame()
+      }, 1800)
+    } else {
+      showTransition('答对啦！', `下一题马上开始（${questionCount.value}/${maxQuestionCount}）`, '✅')
+      delayedActionTimer = setTimeout(() => {
+        generateQuestion()
+      }, 1500)
+    }
   } else {
     // 答错了
     combo.value = 0
     audioManager.playError()
     speakText('再想想')
     toast.error('❌ 再想想')
+    delayedActionTimer = setTimeout(() => {
+      isAnswerLocked.value = false
+      clearTransition()
+    }, 800)
   }
 }
 
@@ -1486,6 +1639,47 @@ const speakText = (text: string) => {
   }
 }
 
+.level-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  background: rgba(255, 249, 230, 0.6);
+  backdrop-filter: blur(2px);
+
+  .transition-card {
+    min-width: 320px;
+    max-width: 560px;
+    padding: 36px 48px;
+    text-align: center;
+    background: white;
+    border-radius: 32px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.16);
+    animation: transitionPop 0.35s ease-out;
+
+    .transition-icon {
+      font-size: 72px;
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 40px;
+      color: #2C3E50;
+    }
+
+    p {
+      margin: 0;
+      font-size: 24px;
+      font-weight: bold;
+      color: #5DADE2;
+    }
+  }
+}
+
 // 切换模式按钮
 .change-mode-btn {
   position: fixed;
@@ -1505,6 +1699,1027 @@ const speakText = (text: string) => {
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(248, 180, 217, 0.5);
+  }
+}
+
+// 2岁宝宝友好视觉优化：更软、更大、更明确
+.learning-interactive-page {
+  position: relative;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 12% 14%, rgba(255, 214, 228, 0.9) 0 90px, transparent 92px),
+    radial-gradient(circle at 88% 18%, rgba(194, 232, 255, 0.85) 0 110px, transparent 112px),
+    radial-gradient(circle at 20% 88%, rgba(218, 245, 199, 0.8) 0 120px, transparent 122px),
+    linear-gradient(135deg, #FFF8E7 0%, #FFEAF3 45%, #EAF7FF 100%);
+}
+
+.header {
+  margin: 18px 24px 0;
+  padding: 18px 28px;
+  border: 4px solid rgba(255, 255, 255, 0.78);
+  border-radius: 32px;
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 14px 36px rgba(255, 160, 190, 0.18);
+  backdrop-filter: blur(10px);
+
+  .btn-back,
+  .star-count {
+    min-height: 64px;
+    border-radius: 999px;
+  }
+
+  .btn-back {
+    padding: 14px 26px;
+    background: linear-gradient(135deg, #FFFFFF, #F3FBFF);
+    color: #4B6175;
+    box-shadow: inset 0 -4px 0 rgba(93, 173, 226, 0.12), 0 8px 18px rgba(93, 173, 226, 0.14);
+  }
+
+  .page-title {
+    color: #4A5F7A;
+    text-shadow: 0 3px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  .star-count {
+    box-shadow: inset 0 -5px 0 rgba(255, 140, 0, 0.2), 0 10px 22px rgba(255, 190, 60, 0.28);
+  }
+}
+
+.mode-selection {
+  margin-top: 44px;
+
+  .mode-title {
+    color: #4A5F7A;
+    font-size: 46px;
+  }
+
+  .mode-card {
+    min-height: 240px;
+    padding: 38px 28px;
+    border: 5px solid rgba(255, 255, 255, 0.85);
+    border-radius: 36px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 249, 253, 0.94));
+    box-shadow: inset 0 -8px 0 rgba(255, 206, 224, 0.34), 0 16px 34px rgba(116, 139, 170, 0.14);
+
+    &:nth-child(1) { background: linear-gradient(180deg, #FFFFFF, #FFF0B8); }
+    &:nth-child(2) { background: linear-gradient(180deg, #FFFFFF, #E9F7FF); }
+    &:nth-child(3) { background: linear-gradient(180deg, #FFFFFF, #EFFFF0); }
+    &:nth-child(4) { background: linear-gradient(180deg, #FFFFFF, #F7EFFF); }
+
+    &:hover,
+    &:active {
+      transform: translateY(-6px) scale(1.03);
+      box-shadow: inset 0 -8px 0 rgba(255, 206, 224, 0.42), 0 20px 42px rgba(116, 139, 170, 0.18);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: inset 0 -8px 0 rgba(255, 206, 224, 0.42), 0 0 0 6px rgba(255, 183, 77, 0.34), 0 20px 42px rgba(116, 139, 170, 0.18);
+    }
+
+    .mode-icon {
+      filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.08));
+    }
+
+    .mode-name {
+      font-size: 32px;
+      color: #4A5F7A;
+    }
+
+    .mode-desc {
+      font-size: 20px;
+      color: #7B8DA3;
+    }
+  }
+}
+
+.interactive-area {
+  padding-top: 30px;
+}
+
+.explore-mode {
+  .content-stage {
+    border: 6px solid rgba(255, 255, 255, 0.82);
+    border-radius: 44px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 251, 239, 0.94));
+    box-shadow: inset 0 -10px 0 rgba(255, 226, 167, 0.35), 0 20px 48px rgba(255, 170, 180, 0.16);
+
+    .current-content {
+      .content-image {
+        width: min(430px, 58vw);
+        height: min(430px, 58vw);
+        padding: 26px;
+        border-radius: 44px;
+        background: radial-gradient(circle, #FFFFFF 0%, #FFF8E7 72%);
+        box-shadow: inset 0 -8px 0 rgba(255, 210, 150, 0.25), 0 14px 32px rgba(93, 173, 226, 0.12);
+        animation: babyFloat 3.2s ease-in-out infinite;
+
+        img {
+          filter: drop-shadow(0 12px 16px rgba(76, 88, 110, 0.12));
+        }
+
+        .tap-hint {
+          bottom: -54px;
+          padding: 8px 18px;
+          border-radius: 999px;
+          background: #FFFFFF;
+          color: #FF8DB3;
+          box-shadow: 0 8px 18px rgba(255, 141, 179, 0.18);
+        }
+      }
+
+      .content-name {
+        margin-top: 20px;
+        color: #4A5F7A;
+        font-size: 56px;
+      }
+
+      .content-desc {
+        display: inline-block;
+        max-width: 760px;
+        padding: 14px 26px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.72);
+        color: #7B8DA3;
+      }
+    }
+
+    .nav-arrow {
+      width: 92px;
+      height: 92px;
+      background: linear-gradient(135deg, #8FD8FF, #B8E7FF);
+      box-shadow: inset 0 -7px 0 rgba(69, 152, 206, 0.2), 0 12px 24px rgba(93, 173, 226, 0.24);
+    }
+  }
+
+  .content-nav .nav-dots .dot {
+    width: 20px;
+    height: 20px;
+    background: #FFD8E6;
+
+    &.active {
+      width: 44px;
+      border-radius: 999px;
+      background: #FF9FC2;
+      transform: none;
+    }
+  }
+
+  .action-buttons .action-btn {
+    min-height: 72px;
+    padding: 20px 34px;
+    border-radius: 999px;
+    box-shadow: inset 0 -6px 0 rgba(0, 0, 0, 0.08), 0 12px 24px rgba(116, 139, 170, 0.14);
+
+    &:active {
+      transform: translateY(3px) scale(0.98);
+      box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.08), 0 6px 14px rgba(116, 139, 170, 0.12);
+    }
+  }
+}
+
+.matching-mode,
+.quick-mode,
+.sound-mode {
+  .game-info {
+    flex-wrap: wrap;
+    gap: 16px;
+
+    > div {
+      padding: 12px 22px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.78);
+      color: #4A5F7A;
+      box-shadow: 0 8px 18px rgba(116, 139, 170, 0.1);
+    }
+  }
+}
+
+.matching-mode {
+  .memorize-phase .phase-title,
+  .memorize-phase .countdown {
+    color: #4A5F7A;
+  }
+
+  .matching-grid .matching-card {
+    border: 5px solid rgba(255, 255, 255, 0.88);
+    border-radius: 28px;
+    box-shadow: inset 0 -7px 0 rgba(93, 173, 226, 0.12), 0 12px 26px rgba(116, 139, 170, 0.14);
+
+    .card-front {
+      background: linear-gradient(135deg, #FFB6D2, #B8E7FF);
+      font-size: 72px;
+    }
+
+    .card-back {
+      background: #FFFFFF;
+      padding: 14px;
+    }
+
+    &.matched {
+      opacity: 0.78;
+      filter: saturate(1.15);
+    }
+  }
+}
+
+.quick-mode,
+.sound-mode {
+  .question-area,
+  .sound-game {
+    .voice-question-btn,
+    .play-sound-btn {
+      border: 6px solid rgba(255, 255, 255, 0.78);
+      background: linear-gradient(135deg, #8FD8FF, #B9EAFF);
+      box-shadow: inset 0 -8px 0 rgba(69, 152, 206, 0.18), 0 16px 32px rgba(93, 173, 226, 0.22);
+    }
+
+    .question {
+      color: #4A5F7A;
+    }
+
+    .options-grid {
+      gap: 28px;
+
+      .option-card {
+        min-height: 210px;
+        border: 5px solid rgba(255, 255, 255, 0.88);
+        border-radius: 34px;
+        background: linear-gradient(180deg, #FFFFFF, #FFF9EF);
+        box-shadow: inset 0 -8px 0 rgba(255, 215, 170, 0.26), 0 14px 30px rgba(116, 139, 170, 0.14);
+        position: relative;
+        outline: none;
+        -webkit-tap-highlight-color: transparent;
+
+        &:hover,
+        &:active {
+          transform: translateY(-5px) scale(1.035);
+        }
+
+        &:focus-visible {
+          box-shadow: inset 0 -8px 0 rgba(255, 215, 170, 0.26), 0 0 0 6px rgba(255, 183, 77, 0.34), 0 14px 30px rgba(116, 139, 170, 0.14);
+        }
+
+        &.selected {
+          transform: translateY(-3px) scale(1.03);
+        }
+
+        &.correct {
+          border-color: #8BE58E;
+          background: linear-gradient(180deg, #FFFFFF, #EEFFE9);
+          box-shadow: inset 0 -8px 0 rgba(87, 190, 96, 0.2), 0 16px 34px rgba(87, 190, 96, 0.2);
+          animation: happyPop 0.45s ease-out;
+        }
+
+        &.wrong {
+          border-color: #FFB0C7;
+          background: linear-gradient(180deg, #FFFFFF, #FFF0F5);
+          box-shadow: inset 0 -8px 0 rgba(255, 141, 179, 0.18), 0 16px 34px rgba(255, 141, 179, 0.18);
+          animation: gentleShake 0.36s ease-in-out;
+        }
+
+        &.dimmed {
+          opacity: 0.56;
+          transform: scale(0.98);
+        }
+
+        img {
+          filter: drop-shadow(0 10px 14px rgba(76, 88, 110, 0.12));
+        }
+
+        .answer-badge {
+          position: absolute;
+          left: 50%;
+          bottom: 14px;
+          transform: translateX(-50%);
+          padding: 8px 18px;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.9);
+          color: #4A5F7A;
+          font-size: 18px;
+          font-weight: bold;
+          box-shadow: 0 8px 16px rgba(116, 139, 170, 0.14);
+          white-space: nowrap;
+        }
+      }
+    }
+  }
+}
+
+.level-transition {
+  background: rgba(255, 246, 225, 0.72);
+
+  .transition-card {
+    border: 6px solid rgba(255, 255, 255, 0.9);
+    background: linear-gradient(180deg, #FFFFFF, #FFF1F8);
+    box-shadow: inset 0 -10px 0 rgba(255, 190, 220, 0.26), 0 24px 60px rgba(255, 141, 179, 0.22);
+  }
+}
+
+.change-mode-btn {
+  min-height: 62px;
+  border: 4px solid rgba(255, 255, 255, 0.78);
+  border-radius: 999px;
+  color: #4A5F7A;
+  box-shadow: inset 0 -6px 0 rgba(248, 120, 170, 0.12), 0 12px 24px rgba(248, 180, 217, 0.28);
+}
+
+@media (max-width: 768px) {
+  .header {
+    margin: 12px;
+    padding: 14px;
+    gap: 12px;
+    flex-wrap: wrap;
+
+    .page-title {
+      order: 3;
+      width: 100%;
+      text-align: center;
+      font-size: 32px;
+    }
+  }
+
+  .mode-selection,
+  .interactive-area {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .explore-mode .content-stage {
+    padding: 36px 20px 44px;
+
+    .nav-arrow {
+      position: static;
+      transform: none;
+      margin: 22px 8px 0;
+
+      &:hover,
+      &:active {
+        transform: scale(1.05);
+      }
+    }
+  }
+
+  .quick-mode .question-area .options-grid .option-card,
+  .sound-mode .sound-game .options-grid .option-card {
+    min-height: 160px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .learning-interactive-page {
+    min-height: 100dvh;
+  }
+
+  .header {
+    margin: max(12px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) 0 max(14px, env(safe-area-inset-left));
+  }
+
+  .mode-selection {
+    margin: 34px auto;
+
+    .mode-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+    }
+  }
+
+  .interactive-area {
+    max-width: 100%;
+    padding: 28px max(18px, env(safe-area-inset-right)) calc(110px + env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+  }
+
+  .matching-mode .matching-grid,
+  .quick-mode .question-area .options-grid,
+  .sound-mode .sound-game .options-grid {
+    max-width: 720px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .matching-mode .matching-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .change-mode-btn {
+    right: max(20px, env(safe-area-inset-right));
+    bottom: calc(24px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    border-radius: 26px;
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding: 10px 12px;
+
+    .btn-back,
+    .star-count {
+      min-height: 46px;
+      padding: 8px 12px;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .page-title {
+      order: initial;
+      width: auto;
+      flex: 1;
+      font-size: 24px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .mode-selection {
+    margin-top: 18px;
+    margin-bottom: 0;
+
+    .mode-title {
+      font-size: 30px;
+      margin-bottom: 14px;
+    }
+
+    .mode-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .mode-card {
+      min-height: 128px;
+      padding: 16px 12px;
+      border-radius: 26px;
+
+      .mode-icon {
+        margin-bottom: 6px;
+        font-size: 48px;
+      }
+
+      .mode-name {
+        margin-bottom: 4px;
+        font-size: 20px;
+      }
+
+      .mode-desc {
+        font-size: 13px;
+        line-height: 1.25;
+      }
+    }
+  }
+
+  .explore-mode {
+    .content-stage {
+      border-radius: 34px;
+
+      .current-content {
+        .content-image {
+          width: min(310px, 78vw);
+          height: min(310px, 78vw);
+        }
+
+        .content-name {
+          font-size: 42px;
+        }
+
+        .content-desc {
+          font-size: 20px;
+          border-radius: 24px;
+        }
+      }
+    }
+
+    .action-buttons .action-btn {
+      width: 100%;
+      max-width: 340px;
+    }
+  }
+
+  .matching-mode .matching-grid,
+  .quick-mode .question-area .options-grid,
+  .sound-mode .sound-game .options-grid {
+    gap: 12px;
+  }
+
+  .quick-mode .question-area .voice-question-btn {
+    width: min(320px, 86vw);
+    height: 104px;
+
+    .text {
+      font-size: 22px;
+    }
+  }
+
+  .sound-mode .sound-game .play-sound-btn {
+    width: 170px;
+    height: 170px;
+  }
+
+  .level-transition .transition-card {
+    min-width: auto;
+    width: calc(100vw - 40px);
+    padding: 28px 22px;
+
+    h2 {
+      font-size: 32px;
+    }
+
+    p {
+      font-size: 20px;
+    }
+  }
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .header {
+    padding-top: 10px;
+    padding-bottom: 10px;
+
+    .page-title {
+      font-size: 28px;
+    }
+  }
+
+  .interactive-area {
+    padding-top: 16px;
+  }
+
+  .explore-mode .content-stage {
+    padding: 24px 100px 30px;
+
+    .current-content .content-image {
+      width: min(240px, 32vw);
+      height: min(240px, 32vw);
+      margin-bottom: 18px;
+    }
+  }
+
+  .mode-selection {
+    margin-top: 18px;
+
+    .mode-card {
+      min-height: 150px;
+      padding: 20px;
+    }
+  }
+}
+
+// 单屏交互优化：尽量让每个玩法在手机/平板首屏内完成展示
+@media (max-width: 1024px), (max-height: 820px) {
+  .learning-interactive-page {
+    min-height: 100dvh;
+  }
+
+  .header {
+    min-height: 64px;
+    margin-top: max(8px, env(safe-area-inset-top));
+    padding: 10px 18px;
+    border-radius: 24px;
+
+    .btn-back,
+    .star-count {
+      min-height: 48px;
+      padding: 8px 16px;
+      font-size: 17px;
+    }
+
+    .page-title {
+      font-size: clamp(26px, 4vw, 34px);
+    }
+  }
+
+  .interactive-area {
+    padding-top: 14px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+  }
+
+  .mode-selection {
+    margin: 18px auto;
+
+    .mode-title {
+      margin-bottom: 18px;
+      font-size: clamp(30px, 5vw, 40px);
+    }
+
+    .mode-grid {
+      gap: 16px;
+    }
+
+    .mode-card {
+      min-height: clamp(138px, 19vh, 190px);
+      padding: 20px 16px;
+
+      .mode-icon {
+        margin-bottom: 8px;
+        font-size: clamp(52px, 8vw, 72px);
+      }
+
+      .mode-name {
+        margin-bottom: 6px;
+        font-size: clamp(24px, 4vw, 30px);
+      }
+
+      .mode-desc {
+        font-size: clamp(16px, 2.6vw, 19px);
+        line-height: 1.35;
+      }
+    }
+  }
+
+  .explore-mode {
+    display: flex;
+    flex-direction: column;
+
+    .content-stage {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+      margin-bottom: 14px;
+      padding: clamp(18px, 3vh, 34px) clamp(18px, 5vw, 70px);
+
+      .current-content {
+        .content-image {
+          width: min(46dvh, 52vw, 360px);
+          height: min(46dvh, 52vw, 360px);
+          margin-bottom: 16px;
+          padding: clamp(12px, 2vh, 22px);
+
+          .tap-hint {
+            bottom: -36px;
+            font-size: 17px;
+          }
+        }
+
+        .content-name {
+          margin-top: 10px;
+          margin-bottom: 8px;
+          font-size: clamp(34px, 6vw, 48px);
+          line-height: 1.15;
+        }
+
+        .content-desc {
+          max-width: 680px;
+          padding: 8px 18px;
+          font-size: clamp(18px, 3vw, 22px);
+          line-height: 1.35;
+        }
+      }
+
+      .nav-arrow {
+        width: clamp(58px, 8vw, 76px);
+        height: clamp(58px, 8vw, 76px);
+        font-size: clamp(28px, 5vw, 38px);
+      }
+    }
+
+    .content-nav {
+      margin-bottom: 12px;
+    }
+
+    .action-buttons {
+      gap: 12px;
+
+      .action-btn {
+        min-height: 56px;
+        padding: 12px 22px;
+        font-size: clamp(18px, 3vw, 22px);
+      }
+    }
+  }
+
+  .matching-mode {
+    .memorize-phase {
+      .phase-title {
+        margin-bottom: 10px;
+        font-size: clamp(30px, 5vw, 42px);
+        line-height: 1.2;
+      }
+
+      .countdown {
+        margin-bottom: 14px;
+        font-size: clamp(46px, 8vw, 70px);
+        line-height: 1;
+      }
+    }
+
+    .game-phase .game-info {
+      margin-bottom: 16px;
+    }
+
+    .matching-grid {
+      max-width: min(820px, 92vw);
+      gap: clamp(10px, 2vw, 18px);
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+
+      .matching-card {
+        border-radius: 22px;
+
+        .card-front {
+          font-size: clamp(42px, 7vw, 64px);
+        }
+      }
+    }
+  }
+
+  .quick-mode,
+  .sound-mode {
+    .game-info {
+      margin-bottom: 16px;
+      font-size: clamp(18px, 3vw, 24px);
+    }
+
+    .question-area,
+    .sound-game {
+      .voice-question-btn {
+        width: min(420px, 86vw);
+        height: clamp(82px, 13vh, 110px);
+        margin-bottom: 18px;
+
+        .icon {
+          font-size: clamp(38px, 7vw, 56px);
+        }
+
+        .text {
+          font-size: clamp(20px, 4vw, 26px);
+        }
+      }
+
+      .play-sound-btn {
+        width: clamp(104px, 18vh, 150px);
+        height: clamp(104px, 18vh, 150px);
+        margin-bottom: 10px;
+
+        .icon {
+          font-size: clamp(40px, 8vw, 62px);
+        }
+
+        .text {
+          font-size: clamp(17px, 3vw, 22px);
+        }
+      }
+
+      .question {
+        margin-bottom: 16px;
+        font-size: clamp(28px, 5vw, 42px);
+        line-height: 1.2;
+      }
+
+      .options-grid {
+        max-width: min(760px, 92vw);
+        gap: clamp(10px, 2vw, 18px);
+
+        .option-card {
+          min-height: clamp(96px, 18vh, 160px);
+          padding: clamp(8px, 1.5vw, 16px);
+          border-radius: 24px;
+
+          img {
+            max-height: clamp(74px, 14vh, 126px);
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) and (max-height: 780px) {
+  .header {
+    margin-left: 10px;
+    margin-right: 10px;
+
+    .page-title {
+      font-size: 22px;
+    }
+  }
+
+  .interactive-area {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .explore-mode {
+    .content-stage {
+      padding-left: 12px;
+      padding-right: 12px;
+
+      .current-content .content-image {
+        width: min(28dvh, 58vw, 210px);
+        height: min(28dvh, 58vw, 210px);
+      }
+    }
+
+    .action-buttons .action-btn {
+      min-height: 50px;
+      padding: 10px 18px;
+    }
+  }
+
+  .quick-mode .question-area .options-grid .option-card,
+  .sound-mode .sound-game .options-grid .option-card {
+    min-height: clamp(82px, 16vh, 128px);
+  }
+
+  .quick-mode,
+  .sound-mode {
+    .game-info {
+      margin-bottom: 8px;
+
+      > div {
+        padding: 6px 12px;
+        font-size: 16px;
+      }
+    }
+
+    .question-area,
+    .sound-game {
+      .voice-question-btn {
+        height: 76px;
+        margin-bottom: 10px;
+      }
+
+      .play-sound-btn {
+        width: 96px;
+        height: 96px;
+        margin-bottom: 8px;
+      }
+
+      .question {
+        margin-bottom: 10px;
+        font-size: 24px;
+      }
+
+      .options-grid {
+        gap: 8px;
+      }
+    }
+  }
+
+  .mode-selection {
+    margin: 12px auto;
+    margin-bottom: 0;
+
+    .mode-title {
+      font-size: 26px;
+      margin-bottom: 10px;
+    }
+
+    .mode-card {
+      min-height: 108px;
+      padding: 12px 10px;
+
+      .mode-icon {
+        font-size: 38px;
+      }
+
+      .mode-name {
+        font-size: 18px;
+      }
+
+      .mode-desc {
+        font-size: 12px;
+      }
+    }
+  }
+
+  .matching-mode {
+    .memorize-phase {
+      .phase-title {
+        font-size: 24px;
+      }
+
+      .countdown {
+        margin-bottom: 8px;
+        font-size: 42px;
+      }
+    }
+
+    .game-phase .game-info {
+      margin-bottom: 8px;
+    }
+
+    .matching-grid {
+      gap: 8px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+
+      .matching-card {
+        border-width: 3px;
+        border-radius: 14px;
+
+        .card-front {
+          font-size: 30px;
+        }
+
+        .card-back {
+          padding: 6px;
+        }
+      }
+    }
+  }
+
+  .change-mode-btn {
+    right: max(12px, env(safe-area-inset-right));
+    bottom: calc(14px + env(safe-area-inset-bottom));
+    min-height: 48px;
+    padding: 8px 16px;
+    font-size: 17px;
+  }
+}
+
+@media (max-width: 380px) and (max-height: 700px) {
+  .explore-mode {
+    .content-stage {
+      margin-bottom: 6px;
+      padding-top: 10px;
+      padding-bottom: 10px;
+
+      .current-content {
+        .content-image {
+          width: min(25dvh, 54vw, 185px);
+          height: min(25dvh, 54vw, 185px);
+          margin-bottom: 8px;
+
+          .tap-hint {
+            display: none;
+          }
+        }
+
+        .content-name {
+          margin-top: 4px;
+          font-size: 30px;
+        }
+
+        .content-desc {
+          padding: 6px 12px;
+          font-size: 16px;
+        }
+      }
+    }
+
+    .content-nav {
+      display: none;
+    }
+  }
+}
+
+@media (orientation: landscape) and (min-width: 900px) and (max-height: 820px) {
+  .mode-selection {
+    margin-bottom: 0;
+
+    .mode-title {
+      margin-bottom: 10px;
+    }
+
+    .mode-card {
+      min-height: 132px;
+      padding-top: 16px;
+      padding-bottom: 14px;
+    }
+  }
+}
+
+@keyframes babyFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes happyPop {
+  0% {
+    transform: scale(0.96);
+  }
+  60% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1.03);
+  }
+}
+
+@keyframes gentleShake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-6px);
+  }
+  75% {
+    transform: translateX(6px);
+  }
+}
+
+@keyframes transitionPop {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 

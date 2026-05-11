@@ -34,6 +34,8 @@ const toggleSound = () => {
   cursor: pointer;
   transition: all 0.3s;
   z-index: 1000;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 
   &:hover {
     transform: scale(1.1);
@@ -59,11 +61,37 @@ const toggleSound = () => {
   .sound-toggle {
     width: 56px;
     height: 56px;
-    bottom: 20px;
-    right: 20px;
+    bottom: calc(18px + env(safe-area-inset-bottom));
+    right: max(18px, env(safe-area-inset-right));
 
     .icon {
       font-size: 28px;
+    }
+  }
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .sound-toggle {
+    width: 48px;
+    height: 48px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+
+    .icon {
+      font-size: 24px;
+    }
+  }
+}
+
+@media (max-width: 480px) and (max-height: 780px) {
+  .sound-toggle {
+    width: 44px;
+    height: 44px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    left: max(12px, env(safe-area-inset-left));
+    right: auto;
+
+    .icon {
+      font-size: 22px;
     }
   }
 }

@@ -1,0 +1,81 @@
+# 儿童教育平台后端配置文件
+
+server:
+  port: 8080
+  mode: debug  # debug, release, test
+
+database:
+  host: localhost
+  port: 3306
+  user: kidsuser
+  password: kids123
+  dbname: kids_education
+  max_idle_conns: 10
+  max_open_conns: 100
+  conn_max_lifetime: 3600  # 秒
+
+redis:
+  host: localhost
+  port: 6379
+  password: ""
+  db: 0
+  pool_size: 10
+
+jwt:
+  secret: your-secret-key-change-in-production
+  expire_hours: 24
+  refresh_expire_hours: 168  # 7天
+
+# 腾讯云COS配置
+cos:
+  secret_id: ""
+  secret_key: ""
+  bucket_url: ""
+  region: ap-guangzhou
+
+# 短信服务配置（腾讯云SMS）
+sms:
+  provider: tencent
+  app_id: ""
+  app_key: ""
+  sign_name: "儿童教育平台"
+  template_id: ""
+
+# 微信登录配置
+wechat:
+  web:
+    app_id: ""
+    app_secret: ""
+  # 小程序配置（预留）
+  miniprogram:
+    app_id: ""
+    app_secret: ""
+
+# 日志配置
+log:
+  level: info  # debug, info, warn, error
+  filename: logs/app.log
+  max_size: 100  # MB
+  max_backups: 3
+  max_age: 28  # 天
+  compress: true
+
+# CORS配置
+cors:
+  allow_origins:
+    - http://localhost:5173
+    - http://localhost:3000
+  allow_methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - OPTIONS
+  allow_headers:
+    - Origin
+    - Content-Type
+    - Authorization
+  expose_headers:
+    - Content-Length
+  allow_credentials: true
+  max_age: 12  # 小时

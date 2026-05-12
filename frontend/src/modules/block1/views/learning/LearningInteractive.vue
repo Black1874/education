@@ -1,7 +1,7 @@
 <template>
-  <div class="learning-interactive-page">
+  <div class="learning-interactive-page polished-shell">
     <!-- 顶部导航 -->
-    <header class="header">
+    <header class="header polished-panel">
       <button class="btn-back" @click="goBack">
         <span>←</span>
         <span>返回</span>
@@ -76,18 +76,18 @@
 
         <!-- 操作按钮 -->
         <div class="action-buttons">
-          <button class="action-btn favorite" @click="toggleFavorite">
-            {{ currentContent?.isFavorite ? '❤️ 已收藏' : '🤍 收藏' }}
-          </button>
-          <button class="action-btn play" @click="playContentSound">
-            🔊 播放声音
+          <button class="action-btn play compact" @click="playContentSound" aria-label="播放声音">
+            <span>🔊</span>
+            <span>声音</span>
           </button>
           <button
-            class="action-btn autoplay"
+            class="action-btn autoplay compact"
             :class="{ active: isAutoPlay }"
             @click="toggleAutoPlay"
+            :aria-label="isAutoPlay ? '暂停自动播放' : '开始自动播放'"
           >
-            {{ isAutoPlay ? '⏸️ 暂停' : '▶️ 自动播放' }}
+            <span>{{ isAutoPlay ? '⏸️' : '▶️' }}</span>
+            <span>{{ isAutoPlay ? '暂停' : '自动' }}</span>
           </button>
         </div>
       </div>
@@ -234,7 +234,8 @@
 
       <!-- 模式切换按钮 -->
       <button class="change-mode-btn" @click="changeMode">
-        🔄 切换模式
+        <span class="change-icon">🔄</span>
+        <span class="change-text">切换模式</span>
       </button>
     </main>
   </div>
@@ -710,25 +711,6 @@ const playContentSound = () => {
     if (storageManager.markContentLearned(currentContent.value.id)) {
       storageManager.addStars(5, `learn_${currentContent.value.id}`)
       toast.success('⭐ 第一次学会啦！+5⭐')
-      loadUserData()
-    }
-  }
-}
-
-const toggleFavorite = () => {
-  if (currentContent.value) {
-    audioManager.playClick()
-
-    if (currentContent.value.isFavorite) {
-      storageManager.removeFavorite(currentContent.value.id)
-      currentContent.value.isFavorite = false
-      toast.info('已取消收藏')
-    } else {
-      storageManager.addFavorite(currentContent.value.id)
-      currentContent.value.isFavorite = true
-      storageManager.addStars(2, `favorite_${currentContent.value.id}`)
-      audioManager.playSuccess()
-      toast.success('❤️ 收藏成功！+2⭐')
       loadUserData()
     }
   }
@@ -1365,26 +1347,30 @@ const speakText = (text: string) => {
   .action-buttons {
     display: flex;
     justify-content: center;
-    gap: 24px;
+    gap: 12px;
     flex-wrap: wrap;
 
     .action-btn {
-      padding: 20px 40px;
-      font-size: 24px;
+      min-height: 44px;
+      padding: 10px 18px;
+      font-size: 18px;
       font-weight: bold;
       border: none;
-      border-radius: 16px;
+      border-radius: 999px;
       cursor: pointer;
       transition: all 0.3s;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 
+      &.compact {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+
       &:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-      }
-
-      &.favorite {
-        background: linear-gradient(135deg, #F8B4D9, #FCE4EC);
       }
 
       &.play {
@@ -1798,7 +1784,10 @@ const speakText = (text: string) => {
 }
 
 .explore-mode {
+  min-height: min(760px, calc(100dvh - 122px));
+
   .content-stage {
+    min-height: min(640px, calc(100dvh - 232px));
     border: 6px solid rgba(255, 255, 255, 0.82);
     border-radius: 44px;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 251, 239, 0.94));
@@ -1806,9 +1795,9 @@ const speakText = (text: string) => {
 
     .current-content {
       .content-image {
-        width: min(430px, 58vw);
-        height: min(430px, 58vw);
-        padding: 26px;
+        width: min(560px, 68vw, 58dvh);
+        height: min(560px, 68vw, 58dvh);
+        padding: clamp(20px, 4vw, 34px);
         border-radius: 44px;
         background: radial-gradient(circle, #FFFFFF 0%, #FFF8E7 72%);
         box-shadow: inset 0 -8px 0 rgba(255, 210, 150, 0.25), 0 14px 32px rgba(93, 173, 226, 0.12);
@@ -1829,9 +1818,9 @@ const speakText = (text: string) => {
       }
 
       .content-name {
-        margin-top: 20px;
+        margin-top: 14px;
         color: #4A5F7A;
-        font-size: 56px;
+        font-size: clamp(48px, 6vw, 68px);
       }
 
       .content-desc {
@@ -1865,10 +1854,15 @@ const speakText = (text: string) => {
     }
   }
 
+  .action-buttons {
+    margin-top: -2px;
+  }
+
   .action-buttons .action-btn {
-    min-height: 72px;
-    padding: 20px 34px;
+    min-height: 42px;
+    padding: 8px 16px;
     border-radius: 999px;
+    font-size: 16px;
     box-shadow: inset 0 -6px 0 rgba(0, 0, 0, 0.08), 0 12px 24px rgba(116, 139, 170, 0.14);
 
     &:active {
@@ -1896,9 +1890,61 @@ const speakText = (text: string) => {
 }
 
 .matching-mode {
+  min-height: min(760px, calc(100dvh - 122px));
+
+  .memorize-phase,
+  .game-phase {
+    display: flex;
+    flex-direction: column;
+    min-height: min(660px, calc(100dvh - 150px));
+  }
+
   .memorize-phase .phase-title,
   .memorize-phase .countdown {
     color: #4A5F7A;
+  }
+
+  .memorize-phase {
+    .phase-title {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      align-self: center;
+      margin-bottom: 8px;
+      padding: 8px 20px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.76);
+      font-size: clamp(24px, 4vw, 38px);
+      box-shadow: 0 8px 18px rgba(116, 139, 170, 0.1);
+    }
+
+    .countdown {
+      align-self: center;
+      margin-bottom: 12px;
+      padding: 4px 18px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #FFF1B8, #FFE2A8);
+      font-size: clamp(34px, 6vw, 58px);
+      line-height: 1.1;
+      box-shadow: inset 0 -5px 0 rgba(255, 166, 0, 0.14), 0 8px 18px rgba(255, 190, 70, 0.18);
+    }
+  }
+
+  .game-phase .game-info {
+    margin-bottom: 12px;
+    gap: 10px;
+    font-size: clamp(17px, 2.6vw, 22px);
+
+    > div {
+      min-height: 40px;
+      padding: 7px 16px;
+    }
+  }
+
+  .matching-grid {
+    width: min(1040px, 96vw, calc((100dvh - 228px) * 2));
+    max-width: none;
+    gap: clamp(10px, 1.8vw, 18px);
   }
 
   .matching-grid .matching-card {
@@ -2107,6 +2153,10 @@ const speakText = (text: string) => {
 }
 
 @media (max-width: 480px) {
+  .interactive-area {
+    padding-bottom: calc(76px + env(safe-area-inset-bottom));
+  }
+
   .header {
     border-radius: 26px;
     flex-wrap: nowrap;
@@ -2171,11 +2221,15 @@ const speakText = (text: string) => {
   .explore-mode {
     .content-stage {
       border-radius: 34px;
+      margin-bottom: 6px;
+      padding-top: 16px;
+      padding-bottom: 14px;
 
       .current-content {
         .content-image {
-          width: min(310px, 78vw);
-          height: min(310px, 78vw);
+          width: min(390px, 86vw, 52dvh);
+          height: min(390px, 86vw, 52dvh);
+          margin-bottom: 8px;
         }
 
         .content-name {
@@ -2190,8 +2244,9 @@ const speakText = (text: string) => {
     }
 
     .action-buttons .action-btn {
-      width: 100%;
-      max-width: 340px;
+      width: auto;
+      min-width: 92px;
+      max-width: none;
     }
   }
 
@@ -2226,6 +2281,28 @@ const speakText = (text: string) => {
 
     p {
       font-size: 20px;
+    }
+  }
+
+  .change-mode-btn {
+    left: max(12px, env(safe-area-inset-left));
+    right: auto;
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    min-width: 54px;
+    min-height: 54px;
+    width: 54px;
+    height: 54px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 0;
+
+    .change-icon {
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .change-text {
+      display: none;
     }
   }
 }
@@ -2329,21 +2406,22 @@ const speakText = (text: string) => {
   .explore-mode {
     display: flex;
     flex-direction: column;
+    min-height: calc(100dvh - 126px);
 
     .content-stage {
       flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 0;
-      margin-bottom: 14px;
-      padding: clamp(18px, 3vh, 34px) clamp(18px, 5vw, 70px);
+      min-height: calc(100dvh - 238px);
+      margin-bottom: 8px;
+      padding: clamp(14px, 2.4vh, 26px) clamp(18px, 5vw, 70px);
 
       .current-content {
         .content-image {
-          width: min(46dvh, 52vw, 360px);
-          height: min(46dvh, 52vw, 360px);
-          margin-bottom: 16px;
+          width: min(56dvh, 62vw, 480px);
+          height: min(56dvh, 62vw, 480px);
+          margin-bottom: 10px;
           padding: clamp(12px, 2vh, 22px);
 
           .tap-hint {
@@ -2353,9 +2431,9 @@ const speakText = (text: string) => {
         }
 
         .content-name {
-          margin-top: 10px;
-          margin-bottom: 8px;
-          font-size: clamp(34px, 6vw, 48px);
+          margin-top: 6px;
+          margin-bottom: 6px;
+          font-size: clamp(38px, 6vw, 56px);
           line-height: 1.15;
         }
 
@@ -2375,42 +2453,51 @@ const speakText = (text: string) => {
     }
 
     .content-nav {
-      margin-bottom: 12px;
+      margin-bottom: 6px;
     }
 
     .action-buttons {
       gap: 12px;
 
       .action-btn {
-        min-height: 56px;
-        padding: 12px 22px;
-        font-size: clamp(18px, 3vw, 22px);
+        min-height: 40px;
+        padding: 8px 16px;
+        font-size: clamp(15px, 2.6vw, 18px);
       }
     }
   }
 
   .matching-mode {
+    min-height: auto;
+
+    .memorize-phase,
+    .game-phase {
+      min-height: auto;
+    }
+
     .memorize-phase {
       .phase-title {
-        margin-bottom: 10px;
-        font-size: clamp(30px, 5vw, 42px);
+        margin-bottom: 6px;
+        padding: 6px 16px;
+        font-size: clamp(22px, 4vw, 34px);
         line-height: 1.2;
       }
 
       .countdown {
-        margin-bottom: 14px;
-        font-size: clamp(46px, 8vw, 70px);
+        margin-bottom: 10px;
+        font-size: clamp(32px, 6vw, 54px);
         line-height: 1;
       }
     }
 
     .game-phase .game-info {
-      margin-bottom: 16px;
+      margin-bottom: 8px;
     }
 
     .matching-grid {
-      max-width: min(820px, 92vw);
-      gap: clamp(10px, 2vw, 18px);
+      width: min(940px, 94vw, calc((100dvh - 176px) * 2));
+      max-width: none;
+      gap: clamp(8px, 1.6vw, 16px);
       grid-template-columns: repeat(4, minmax(0, 1fr));
 
       .matching-card {
@@ -2484,6 +2571,44 @@ const speakText = (text: string) => {
   }
 }
 
+@media (min-width: 481px) and (max-width: 1024px) and (orientation: portrait) {
+  .explore-mode {
+    min-height: auto;
+
+    .content-stage {
+      min-height: auto;
+      padding-top: 18px;
+      padding-bottom: 16px;
+
+      .current-content {
+        .content-image {
+          width: min(44dvh, 58vw, 430px);
+          height: min(44dvh, 58vw, 430px);
+        }
+
+        .content-name {
+          font-size: clamp(40px, 6vw, 54px);
+        }
+      }
+    }
+  }
+
+  .matching-mode {
+    .matching-grid {
+      width: min(960px, 94vw, calc((100dvh - 188px) * 2));
+      gap: 14px;
+    }
+
+    .matching-grid .matching-card {
+      border-radius: 26px;
+
+      .card-front {
+        font-size: clamp(58px, 8vw, 82px);
+      }
+    }
+  }
+}
+
 @media (max-width: 480px) and (max-height: 780px) {
   .header {
     margin-left: 10px;
@@ -2505,14 +2630,14 @@ const speakText = (text: string) => {
       padding-right: 12px;
 
       .current-content .content-image {
-        width: min(28dvh, 58vw, 210px);
-        height: min(28dvh, 58vw, 210px);
+        width: min(42dvh, 72vw, 270px);
+        height: min(42dvh, 72vw, 270px);
       }
     }
 
     .action-buttons .action-btn {
-      min-height: 50px;
-      padding: 10px 18px;
+      min-height: 38px;
+      padding: 7px 14px;
     }
   }
 
@@ -2600,34 +2725,187 @@ const speakText = (text: string) => {
     }
 
     .matching-grid {
+      width: min(326px, 88vw, calc((100dvh - 166px) * 0.5));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .matching-grid .matching-card {
+      border-width: 4px;
+      border-radius: 22px;
+
+      .card-front,
+      .card-back {
+        border-radius: 18px;
+      }
+
+      .card-front {
+        font-size: clamp(44px, 13vw, 62px);
+      }
+
+      .card-back {
+        padding: 3px;
+
+        img {
+          width: 96%;
+          height: 96%;
+          transform: scale(1.12);
+        }
+      }
+    }
+
+    .game-phase .game-info {
+      margin-bottom: 8px;
       gap: 8px;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+
+      > div {
+        min-height: 34px;
+        padding: 5px 12px;
+        font-size: 15px;
+      }
+    }
+
+    .memorize-phase {
+      .phase-title {
+        margin-bottom: 5px;
+        padding: 5px 14px;
+        font-size: clamp(22px, 7vw, 28px);
+      }
+
+      .countdown {
+        margin-bottom: 8px;
+        padding: 3px 14px;
+        font-size: clamp(34px, 10vw, 46px);
+      }
+    }
+  }
+
+  .explore-mode {
+    .content-stage {
+      border-radius: 34px;
+      margin-bottom: 6px;
+      padding-top: 16px;
+      padding-bottom: 14px;
+
+      .current-content {
+        .content-image {
+          width: min(390px, 86vw, 52dvh);
+          height: min(390px, 86vw, 52dvh);
+          margin-bottom: 8px;
+        }
+
+        .content-name {
+          font-size: 42px;
+        }
+
+        .content-desc {
+          font-size: 20px;
+          border-radius: 24px;
+        }
+      }
+    }
+
+    .action-buttons .action-btn {
+      width: auto;
+      min-width: 92px;
+      max-width: none;
+    }
+  }
+}
+
+@media (max-width: 480px) and (min-height: 781px) {
+  .matching-mode {
+    .matching-grid {
+      width: min(330px, 88vw, calc((100dvh - 166px) * 0.5));
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .matching-mode {
+    .matching-grid {
+      width: min(280px, 78vw, calc((100dvh - 142px) * 0.48));
+      gap: 6px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
 
       .matching-card {
         border-width: 3px;
         border-radius: 14px;
 
         .card-front {
-          font-size: 30px;
+          font-size: clamp(38px, 12vw, 50px);
         }
 
         .card-back {
-          padding: 6px;
+          padding: 4px;
         }
+      }
+    }
+
+    .game-phase .game-info {
+      margin-bottom: 6px;
+      gap: 5px;
+
+      > div {
+        min-height: 30px;
+        padding: 4px 10px;
+        font-size: 14px;
       }
     }
   }
 
   .change-mode-btn {
-    right: max(12px, env(safe-area-inset-right));
-    bottom: calc(14px + env(safe-area-inset-bottom));
+    min-height: 54px;
+    padding: 0;
+    font-size: 0;
+  }
+}
+
+@media (max-width: 380px) and (max-height: 760px) {
+  .interactive-area {
+    padding-top: 8px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+  }
+
+  .matching-mode {
+    .game-phase .game-info {
+      margin-bottom: 4px;
+      gap: 4px;
+
+      > div {
+        min-height: 26px;
+        padding: 3px 8px;
+        font-size: 13px;
+      }
+    }
+
+    .matching-grid {
+      width: min(330px, 88vw);
+      gap: 4px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .matching-grid .matching-card {
+      border-width: 2px;
+
+      .card-front {
+        font-size: clamp(34px, 11vw, 44px);
+      }
+    }
+  }
+
+  .change-mode-btn {
+    width: 48px;
+    height: 48px;
     min-height: 48px;
-    padding: 8px 16px;
-    font-size: 17px;
   }
 }
 
 @media (max-width: 380px) and (max-height: 700px) {
+  .interactive-area {
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+  }
+
   .explore-mode {
     .content-stage {
       margin-bottom: 6px;
@@ -2661,9 +2939,97 @@ const speakText = (text: string) => {
       display: none;
     }
   }
+
+  .change-mode-btn {
+    width: 42px;
+    height: 42px;
+    min-height: 42px;
+    opacity: 0.82;
+  }
 }
 
 @media (orientation: landscape) and (min-width: 900px) and (max-height: 820px) {
+  .interactive-area {
+    padding-top: 10px;
+    padding-bottom: calc(6px + env(safe-area-inset-bottom));
+  }
+
+  .explore-mode {
+    min-height: auto;
+
+    .content-stage {
+      min-height: auto;
+      margin-bottom: 6px;
+      padding: 14px 90px 12px;
+
+      .current-content {
+        .content-image {
+          width: min(42dvh, 42vw, 330px);
+          height: min(42dvh, 42vw, 330px);
+          margin-bottom: 8px;
+        }
+
+        .content-name {
+          margin-top: 4px;
+          margin-bottom: 4px;
+          font-size: 38px;
+        }
+
+        .content-desc {
+          padding: 7px 18px;
+          font-size: 18px;
+          line-height: 1.25;
+        }
+      }
+    }
+
+    .content-nav {
+      margin-bottom: 4px;
+    }
+
+    .action-buttons .action-btn {
+      min-height: 36px;
+      padding: 6px 14px;
+      font-size: 15px;
+    }
+  }
+
+  .matching-mode {
+    .memorize-phase,
+    .game-phase {
+      min-height: auto;
+    }
+
+    .memorize-phase {
+      .phase-title {
+        margin-bottom: 4px;
+        padding: 5px 16px;
+        font-size: 28px;
+      }
+
+      .countdown {
+        margin-bottom: 8px;
+        padding: 3px 16px;
+        font-size: 42px;
+      }
+    }
+
+    .game-phase .game-info {
+      margin-bottom: 8px;
+
+      > div {
+        min-height: 34px;
+        padding: 5px 14px;
+        font-size: 16px;
+      }
+    }
+
+    .matching-grid {
+      width: min(980px, 94vw, calc((100dvh - 150px) * 2));
+      gap: 12px;
+    }
+  }
+
   .mode-selection {
     margin-bottom: 0;
 

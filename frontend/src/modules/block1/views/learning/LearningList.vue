@@ -1,7 +1,7 @@
 <template>
-  <div class="learning-list-page">
+  <div class="learning-list-page polished-shell">
     <!-- 顶部导航 -->
-    <header class="header">
+    <header class="header polished-panel">
       <button class="btn-back" @click="goBack">
         <span>←</span>
         <span>返回</span>

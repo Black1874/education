@@ -1,7 +1,7 @@
 <template>
-  <div class="home-page">
+  <div class="home-page polished-shell">
     <!-- 顶部导航 -->
-    <header class="header">
+    <header class="header polished-panel">
       <div class="header-left">
         <h1 class="logo">🎈 儿童教育平台</h1>
       </div>
@@ -58,7 +58,7 @@
 
       <!-- 虚拟宠物 -->
       <div class="pet-section" v-if="showPet">
-        <div class="pet-card">
+        <div class="pet-card polished-panel">
           <div class="pet-avatar">🐼</div>
           <div class="pet-info">
             <h4>我的小熊猫</h4>

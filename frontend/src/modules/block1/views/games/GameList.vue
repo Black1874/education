@@ -1,6 +1,6 @@
 <template>
-  <div class="game-list-page">
-    <header class="header">
+  <div class="game-list-page polished-shell">
+    <header class="header polished-panel">
       <button class="btn-back" @click="goBack">
         <span>←</span>
         <span>返回</span>

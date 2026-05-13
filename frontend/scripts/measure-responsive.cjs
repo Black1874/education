@@ -1,9 +1,13 @@
 ﻿const base = 'http://127.0.0.1:5173'
 const devices = [
   { name: 'iPhone SE', width: 375, height: 667, dpr: 2, mobile: true },
+  { name: 'iPhone SE landscape', width: 667, height: 375, dpr: 2, mobile: true },
   { name: 'iPhone 14/15', width: 390, height: 844, dpr: 3, mobile: true },
+  { name: 'iPhone 14/15 landscape', width: 844, height: 390, dpr: 3, mobile: true },
   { name: 'Android small', width: 360, height: 740, dpr: 3, mobile: true },
+  { name: 'Android small landscape', width: 740, height: 360, dpr: 3, mobile: true },
   { name: 'Android large', width: 412, height: 915, dpr: 2.75, mobile: true },
+  { name: 'Android large landscape', width: 915, height: 412, dpr: 2.75, mobile: true },
   { name: 'iPad portrait', width: 768, height: 1024, dpr: 2, mobile: true },
   { name: 'iPad landscape', width: 1024, height: 768, dpr: 2, mobile: true },
 ]

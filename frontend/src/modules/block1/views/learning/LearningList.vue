@@ -603,4 +603,100 @@ const goToCategory = (categoryId: string) => {
     transform: rotate(3deg) scale(1.04);
   }
 }
+
+@media (orientation: landscape) and (max-height: 430px) {
+  .learning-list-page {
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .header {
+    flex-shrink: 0;
+    margin: max(4px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) 0 max(8px, env(safe-area-inset-left));
+    padding: 5px 8px;
+    border-width: 2px;
+    border-radius: 18px;
+    gap: 6px;
+
+    .btn-back,
+    .star-count {
+      min-height: 30px;
+      padding: 4px 9px;
+      border-radius: 14px;
+      font-size: 12px;
+    }
+
+    .page-title {
+      flex: 1;
+      min-width: 0;
+      font-size: clamp(18px, 3.4vw, 23px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .main-content {
+    flex: 1;
+    width: 100%;
+    max-width: none;
+    min-height: 0;
+    padding: 8px max(10px, env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+    overflow: hidden;
+  }
+
+  .category-grid {
+    height: 100%;
+    min-height: 0;
+    gap: 8px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-auto-rows: minmax(0, 1fr);
+  }
+
+  .category-card {
+    min-height: 0;
+    padding: 9px 7px;
+    border-width: 2px;
+    border-radius: 20px;
+
+    &::after {
+      display: none;
+    }
+
+    .card-icon {
+      margin-bottom: 3px;
+      font-size: clamp(28px, 6vw, 42px);
+      line-height: 1;
+    }
+
+    .card-title {
+      margin-bottom: 3px;
+      font-size: clamp(13px, 2.4vw, 17px);
+      line-height: 1.1;
+    }
+
+    .card-desc {
+      display: none;
+    }
+
+    .card-count {
+      padding: 3px 7px;
+      font-size: 10px;
+      line-height: 1;
+    }
+  }
+}
+
+@media (orientation: landscape) and (max-height: 380px) {
+  .category-card {
+    padding: 7px 6px;
+
+    .card-icon {
+      font-size: clamp(24px, 5.2vw, 34px);
+    }
+  }
+}
 </style>

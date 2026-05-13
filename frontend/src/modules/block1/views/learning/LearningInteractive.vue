@@ -1460,7 +1460,7 @@ const speakText = (text: string) => {
       &.matched {
         opacity: 1;
         pointer-events: none;
-        transform: rotateY(180deg);
+        transform: none;
       }
 
       .card-front,
@@ -2054,7 +2054,7 @@ const speakText = (text: string) => {
     &.matched {
       opacity: 1;
       filter: saturate(1.15);
-      transform: rotateY(180deg) scale(1.02);
+      transform: scale(1.02);
       box-shadow: inset 0 -7px 0 rgba(82, 196, 26, 0.14), 0 12px 26px rgba(82, 196, 26, 0.16);
     }
   }
@@ -3309,6 +3309,443 @@ const speakText = (text: string) => {
       min-height: 132px;
       padding-top: 16px;
       padding-bottom: 14px;
+    }
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  .learning-interactive-page {
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .header {
+    flex-shrink: 0;
+    min-height: 38px;
+    margin: max(4px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) 0 max(8px, env(safe-area-inset-left));
+    padding: 5px 8px;
+    border-radius: 18px;
+    gap: 6px;
+
+    .btn-back,
+    .star-count {
+      min-height: 30px;
+      padding: 4px 9px;
+      border-radius: 14px;
+      font-size: 12px;
+    }
+
+    .page-title {
+      flex: 1;
+      min-width: 0;
+      font-size: clamp(17px, 3.2vw, 22px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .mode-selection,
+  .interactive-area {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .mode-selection {
+    width: 100%;
+    margin: 0 auto;
+    padding: 6px max(10px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    .mode-title {
+      margin-bottom: 8px;
+      font-size: clamp(22px, 4vw, 28px);
+      line-height: 1.05;
+    }
+
+    .mode-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .mode-card {
+      min-height: 96px;
+      padding: 10px 8px;
+      border-radius: 20px;
+
+      .mode-icon {
+        margin-bottom: 3px;
+        font-size: clamp(30px, 6vw, 42px);
+      }
+
+      .mode-name {
+        margin-bottom: 2px;
+        font-size: clamp(15px, 2.5vw, 18px);
+      }
+
+      .mode-desc {
+        font-size: 11px;
+        line-height: 1.18;
+      }
+    }
+  }
+
+  .interactive-area {
+    width: 100%;
+    max-width: none;
+    padding: 6px max(10px, env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+    overflow: hidden;
+  }
+
+  .change-mode-btn {
+    left: max(8px, env(safe-area-inset-left));
+    right: auto;
+    bottom: calc(8px + env(safe-area-inset-bottom));
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+    padding: 0;
+    border-width: 2px;
+    border-radius: 50%;
+    font-size: 0;
+    opacity: 0.82;
+
+    .change-icon {
+      font-size: 18px;
+    }
+
+    .change-text {
+      display: none;
+    }
+  }
+
+  .sound-toggle {
+    right: max(8px, env(safe-area-inset-right));
+    bottom: calc(8px + env(safe-area-inset-bottom));
+    width: 38px;
+    height: 38px;
+    min-height: 38px;
+    border-width: 2px;
+    font-size: 17px;
+    opacity: 0.82;
+  }
+
+  .explore-mode {
+    height: 100%;
+    min-height: 0;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto auto;
+    gap: 4px;
+
+    .content-stage {
+      min-height: 0;
+      margin-bottom: 0;
+      padding: 8px 12px;
+      border-radius: 24px;
+      overflow: hidden;
+
+      .current-content {
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        display: grid;
+        grid-template-columns: minmax(132px, 34dvh) minmax(0, 1fr);
+        grid-template-rows: auto auto;
+        align-items: center;
+        justify-content: center;
+        column-gap: 14px;
+        text-align: left;
+
+        .content-image {
+          grid-row: 1 / span 2;
+          width: min(44dvh, 30vw, 180px);
+          height: min(44dvh, 30vw, 180px);
+          margin: 0 auto;
+          padding: 8px;
+
+          .tap-hint {
+            display: none;
+          }
+        }
+
+        .content-name {
+          align-self: end;
+          margin: 0 0 4px;
+          font-size: clamp(26px, 5vw, 38px);
+          line-height: 1.05;
+        }
+
+        .content-desc {
+          align-self: start;
+          max-width: 100%;
+          margin: 0;
+          padding: 6px 12px;
+          font-size: clamp(14px, 2.5vw, 17px);
+          line-height: 1.22;
+        }
+      }
+    }
+
+    .content-nav {
+      display: none;
+    }
+
+    .explore-controls {
+      margin: 0;
+      gap: 6px;
+    }
+
+    .explore-control {
+      min-width: 82px;
+      min-height: 30px;
+      padding: 4px 10px;
+      border-width: 2px;
+      font-size: 12px;
+    }
+
+    .content-index {
+      min-width: 46px;
+      min-height: 28px;
+      padding: 3px 8px;
+      border-width: 2px;
+      font-size: 11px;
+    }
+
+    .control-icon {
+      font-size: 14px;
+    }
+
+    .action-buttons {
+      gap: 6px;
+
+      .action-btn {
+        min-height: 30px;
+        min-width: 72px;
+        padding: 4px 10px;
+        border-radius: 16px;
+        font-size: 12px;
+      }
+    }
+  }
+
+  .matching-mode {
+    height: 100%;
+    min-height: 0;
+
+    .memorize-phase,
+    .game-phase {
+      height: 100%;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .memorize-phase {
+      .phase-title {
+        margin-bottom: 3px;
+        padding: 3px 12px;
+        font-size: clamp(18px, 3.6vw, 24px);
+        line-height: 1.05;
+      }
+
+      .countdown {
+        margin-bottom: 5px;
+        padding: 2px 12px;
+        font-size: clamp(28px, 7vw, 38px);
+        line-height: 1;
+      }
+    }
+
+    .game-phase .game-info {
+      margin-bottom: 5px;
+      gap: 5px;
+
+      > div {
+        min-height: 24px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+      }
+    }
+
+    .matching-grid {
+      width: min(92vw, calc((100dvh - 78px) * 2));
+      max-width: none;
+      gap: 5px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+
+      .matching-card {
+        border-width: 2px;
+        border-radius: 14px;
+
+        .card-front {
+          font-size: clamp(30px, 6vw, 44px);
+        }
+
+        .card-back,
+        .matched-face {
+          padding: 4px;
+        }
+
+        .matched-mark {
+          right: 4px;
+          bottom: 4px;
+          width: 20px;
+          height: 20px;
+          font-size: 12px;
+        }
+      }
+    }
+  }
+
+  .quick-mode,
+  .sound-mode {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    .game-info {
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 5px;
+      font-size: 11px;
+
+      > div {
+        min-height: 24px;
+        padding: 2px 8px;
+        border-radius: 999px;
+      }
+    }
+
+    .question-area,
+    .sound-game {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(160px, 0.78fr) minmax(0, 1.22fr);
+      grid-template-rows: auto minmax(0, 1fr);
+      align-items: center;
+      gap: 6px 10px;
+      text-align: center;
+
+      .voice-question-btn,
+      .play-sound-btn {
+        grid-row: 1 / span 2;
+        width: min(148px, 24vw);
+        height: min(96px, 27dvh);
+        margin: 0 auto;
+        border-radius: 24px;
+        gap: 5px;
+
+        .icon {
+          font-size: clamp(28px, 6vw, 42px);
+        }
+
+        .text {
+          font-size: clamp(13px, 2.5vw, 17px);
+          line-height: 1.15;
+        }
+      }
+
+      .play-sound-btn {
+        border-radius: 50%;
+      }
+
+      .question {
+        margin: 0;
+        font-size: clamp(18px, 3.8vw, 26px);
+        line-height: 1.08;
+      }
+
+      .options-grid {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        gap: 6px;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+
+        .option-card {
+          min-height: 0;
+          padding: 5px;
+          border-radius: 16px;
+
+          img {
+            width: 100%;
+            max-height: min(100px, 28dvh);
+            margin-bottom: 0;
+          }
+        }
+      }
+    }
+  }
+
+  .positive-card {
+    padding: 14px 24px 12px;
+    border-width: 4px;
+    border-radius: 30px;
+  }
+
+  .positive-icon {
+    width: 82px;
+    height: 82px;
+    border-radius: 26px;
+    font-size: 58px;
+  }
+
+  .positive-text {
+    margin-top: 6px;
+    font-size: 28px;
+  }
+
+  .positive-ribbon {
+    margin-top: 5px;
+    padding: 4px 12px;
+    font-size: 13px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 380px) {
+  .mode-selection {
+    .mode-card {
+      min-height: 82px;
+      padding: 7px 6px;
+
+      .mode-desc {
+        display: none;
+      }
+    }
+  }
+
+  .explore-mode .content-stage .current-content {
+    grid-template-columns: minmax(112px, 31dvh) minmax(0, 1fr);
+
+    .content-image {
+      width: min(40dvh, 26vw, 150px);
+      height: min(40dvh, 26vw, 150px);
+    }
+  }
+
+  .quick-mode,
+  .sound-mode {
+    .question-area,
+    .sound-game {
+      .voice-question-btn,
+      .play-sound-btn {
+        width: 118px;
+        height: 82px;
+      }
+
+      .options-grid .option-card img {
+        max-height: 78px;
+      }
     }
   }
 }

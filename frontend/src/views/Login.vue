@@ -100,6 +100,63 @@ h1 {
   }
 }
 
+@media (orientation: landscape) and (max-height: 430px) {
+  .login-page {
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+    padding: max(8px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  }
+
+  .login-card {
+    width: min(680px, 100%);
+    padding: 14px 22px;
+    border-radius: 28px;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto auto auto;
+    column-gap: 16px;
+    align-items: center;
+    text-align: left;
+  }
+
+  .mascot {
+    grid-row: 1 / span 4;
+    width: min(110px, 30dvh);
+    height: min(110px, 30dvh);
+    margin: 0;
+    border-radius: 28px;
+    font-size: clamp(46px, 11vw, 70px);
+  }
+
+  .eyebrow {
+    width: max-content;
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+
+  h1 {
+    margin: 5px 0 3px;
+    font-size: clamp(22px, 4.4vw, 30px);
+    line-height: 1.08;
+  }
+
+  .subtitle {
+    max-width: none;
+    margin: 0 0 8px;
+    font-size: clamp(12px, 2.2vw, 15px);
+    line-height: 1.35;
+  }
+
+  .primary-btn {
+    min-width: 0;
+    min-height: 36px;
+    width: max-content;
+    padding: 6px 16px;
+    font-size: 14px;
+  }
+}
+
 @keyframes floatBaby {
   0%, 100% { transform: translateY(0) rotate(-2deg); }
   50% { transform: translateY(-8px) rotate(3deg); }

@@ -475,4 +475,96 @@ const goToGame = (gameId: string) => {
     }
   }
 }
+
+@media (orientation: landscape) and (max-height: 430px) {
+  .game-list-page {
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .header {
+    flex-shrink: 0;
+    margin: max(4px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) 0 max(8px, env(safe-area-inset-left));
+    padding: 5px 8px;
+    border-width: 2px;
+    border-radius: 18px;
+    gap: 6px;
+
+    .btn-back,
+    .star-count {
+      min-height: 30px;
+      padding: 4px 9px;
+      border-radius: 14px;
+      font-size: 12px;
+    }
+
+    .page-title {
+      flex: 1;
+      min-width: 0;
+      font-size: clamp(18px, 3.4vw, 23px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .main-content {
+    flex: 1;
+    width: 100%;
+    max-width: none;
+    min-height: 0;
+    padding: 8px max(10px, env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+    overflow: hidden;
+  }
+
+  .game-grid {
+    height: 100%;
+    min-height: 0;
+    gap: 8px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-rows: minmax(0, 1fr);
+  }
+
+  .game-card {
+    min-height: 0;
+    padding: 10px 8px;
+    border-width: 2px;
+    border-radius: 20px;
+
+    .card-icon {
+      margin-bottom: 3px;
+      font-size: clamp(30px, 7vw, 46px);
+      line-height: 1;
+    }
+
+    .card-title {
+      margin-bottom: 3px;
+      font-size: clamp(14px, 2.8vw, 18px);
+      line-height: 1.1;
+    }
+
+    .card-desc {
+      display: none;
+    }
+
+    .card-levels {
+      padding: 3px 8px;
+      font-size: 10px;
+      line-height: 1;
+    }
+  }
+}
+
+@media (orientation: landscape) and (max-height: 380px) {
+  .game-card {
+    padding: 8px 7px;
+
+    .card-icon {
+      font-size: clamp(26px, 6vw, 38px);
+    }
+  }
+}
 </style>

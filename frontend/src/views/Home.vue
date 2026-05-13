@@ -772,4 +772,139 @@ const feedPet = () => {
     }
   }
 }
+
+@media (orientation: landscape) and (max-height: 430px) {
+  .home-page {
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .header {
+    flex-shrink: 0;
+    margin: max(4px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) 0 max(8px, env(safe-area-inset-left));
+    padding: 5px 8px;
+    border-radius: 18px;
+
+    .logo {
+      max-width: 260px;
+      font-size: clamp(18px, 3.6vw, 22px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .header-right {
+      gap: 8px;
+    }
+
+    .star-count {
+      min-height: 30px;
+      padding: 4px 9px;
+      border-radius: 14px;
+      font-size: 12px;
+
+      .star-icon {
+        font-size: 14px;
+      }
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      font-size: 18px;
+    }
+  }
+
+  .main-content {
+    flex: 1;
+    width: 100%;
+    max-width: none;
+    min-height: 0;
+    padding: 8px max(10px, env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 8px;
+    overflow: hidden;
+  }
+
+  .welcome-section {
+    display: none;
+  }
+
+  .entrance-cards {
+    min-height: 0;
+    margin-bottom: 0;
+    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .entrance-card {
+    min-height: 0;
+    padding: 14px 12px;
+    border-radius: 24px;
+
+    .card-icon {
+      margin-bottom: 5px;
+      font-size: clamp(42px, 10vw, 62px);
+    }
+
+    .card-title {
+      margin-bottom: 4px;
+      font-size: clamp(20px, 4vw, 26px);
+    }
+
+    .card-desc {
+      display: none;
+    }
+
+    .card-badge {
+      padding: 4px 12px;
+      font-size: 12px;
+    }
+  }
+
+  .pet-section {
+    max-width: min(520px, 100%);
+  }
+
+  .pet-card {
+    padding: 8px 12px;
+    border-radius: 20px;
+    gap: 10px;
+
+    .pet-avatar {
+      font-size: 32px;
+    }
+
+    .pet-info h4 {
+      margin-bottom: 2px;
+      font-size: 15px;
+    }
+
+    .pet-info .pet-status {
+      flex-direction: row;
+      gap: 8px;
+      font-size: 11px;
+    }
+
+    .btn-feed {
+      min-height: 30px;
+      padding: 5px 12px;
+      font-size: 12px;
+    }
+  }
+}
+
+@media (orientation: landscape) and (max-height: 380px) {
+  .main-content {
+    grid-template-rows: 1fr;
+  }
+
+  .pet-section {
+    display: none;
+  }
+}
 </style>

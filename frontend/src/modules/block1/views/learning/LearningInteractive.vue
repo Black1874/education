@@ -52,13 +52,6 @@
             <p class="content-desc">{{ currentContent.description }}</p>
           </div>
 
-          <!-- 左右大箭头 -->
-          <button class="nav-arrow left" @click="prevContent">
-            <span>◀</span>
-          </button>
-          <button class="nav-arrow right" @click="nextContent">
-            <span>▶</span>
-          </button>
         </div>
 
         <!-- 底部导航条 -->
@@ -72,6 +65,21 @@
               @click="goToContent(index)"
             ></span>
           </div>
+        </div>
+
+        <!-- 上下一个切换 -->
+        <div class="explore-controls" aria-label="切换学习内容">
+          <button class="explore-control prev" @click="prevContent" aria-label="上一个">
+            <span class="control-icon">🐾</span>
+            <span>上一个</span>
+          </button>
+          <div class="content-index" aria-live="polite">
+            {{ currentIndex + 1 }} / {{ filteredContents.length }}
+          </div>
+          <button class="explore-control next" @click="nextContent" aria-label="下一个">
+            <span>下一个</span>
+            <span class="control-icon">🌈</span>
+          </button>
         </div>
 
         <!-- 操作按钮 -->
@@ -127,10 +135,16 @@
               :class="{ flipped: card.flipped, matched: card.matched }"
               @click="flipCard(card)"
             >
-              <div class="card-front">❓</div>
-              <div class="card-back">
+              <div v-if="card.matched" class="matched-face">
                 <img :src="card.imageUrl" :alt="card.name" />
+                <span class="matched-mark">👍</span>
               </div>
+              <template v-else>
+                <div class="card-front">❓</div>
+                <div class="card-back">
+                  <img :src="card.imageUrl" :alt="card.name" />
+                </div>
+              </template>
             </div>
           </div>
         </div>
@@ -229,6 +243,17 @@
           <div class="transition-icon">{{ transitionIcon }}</div>
           <h2>{{ transitionMessage }}</h2>
           <p>{{ transitionSubMessage }}</p>
+        </div>
+      </div>
+
+      <div v-if="positiveFeedbackVisible" class="positive-feedback" aria-live="polite">
+        <div class="positive-card">
+          <span class="spark spark-one">✨</span>
+          <span class="spark spark-two">⭐</span>
+          <span class="spark spark-three">🌟</span>
+          <div class="positive-icon">{{ positiveFeedbackIcon }}</div>
+          <div class="positive-text">{{ positiveFeedbackText }}</div>
+          <div class="positive-ribbon">继续加油</div>
         </div>
       </div>
 
@@ -500,7 +525,7 @@ const gameTime = ref(0)
 const combo = ref(0)
 const matchingCards = ref<any[]>([])
 const matchingPhase = ref<'memorize' | 'game'>('memorize')
-const memorizeCountdown = ref(10)
+const memorizeCountdown = ref(5)
 const quickOptions = ref<any[]>([])
 const targetName = ref('')
 const targetContent = ref<any>(null)
@@ -512,9 +537,13 @@ const challengeRound = ref(1)
 const transitionMessage = ref('')
 const transitionSubMessage = ref('')
 const transitionIcon = ref('🎉')
+const positiveFeedbackVisible = ref(false)
+const positiveFeedbackText = ref('你真棒')
+const positiveFeedbackIcon = ref('👍')
 let gameTimer: any = null
 let memorizeTimer: any = null
 let delayedActionTimer: any = null
+let feedbackTimer: any = null
 let flippedCards: any[] = []
 
 onMounted(() => {
@@ -543,6 +572,10 @@ const cleanupTimers = () => {
     clearTimeout(delayedActionTimer)
     delayedActionTimer = null
   }
+  if (feedbackTimer) {
+    clearTimeout(feedbackTimer)
+    feedbackTimer = null
+  }
   isAutoPlay.value = false
 }
 
@@ -558,6 +591,21 @@ const showTransition = (message: string, subMessage: string, icon = '🎉') => {
   transitionIcon.value = icon
 }
 
+const showPositiveFeedback = (text = '你真棒', icon = '👍') => {
+  positiveFeedbackText.value = text
+  positiveFeedbackIcon.value = icon
+  positiveFeedbackVisible.value = true
+  speakText('你真棒')
+
+  if (feedbackTimer) {
+    clearTimeout(feedbackTimer)
+  }
+  feedbackTimer = setTimeout(() => {
+    positiveFeedbackVisible.value = false
+    feedbackTimer = null
+  }, 900)
+}
+
 const resetLearningState = () => {
   cleanupTimers()
   currentIndex.value = 0
@@ -566,7 +614,7 @@ const resetLearningState = () => {
   combo.value = 0
   matchingCards.value = []
   matchingPhase.value = 'memorize'
-  memorizeCountdown.value = 10
+  memorizeCountdown.value = 5
   quickOptions.value = []
   targetName.value = ''
   targetContent.value = null
@@ -724,7 +772,7 @@ const initMatchingGame = () => {
   gameTime.value = 0
   combo.value = 0
   matchingPhase.value = 'memorize'
-  memorizeCountdown.value = 10
+  memorizeCountdown.value = 5
   flippedCards = []
 
   // 随机选择4对卡片
@@ -805,9 +853,11 @@ const checkMatch = () => {
     // 配对成功
     card1.matched = true
     card2.matched = true
+    card1.flipped = true
+    card2.flipped = true
     gameScore.value += 10
     audioManager.playSuccess()
-    toast.success('✅ 配对成功！+10分')
+    showPositiveFeedback()
   } else {
     // 配对失败
     card1.flipped = false
@@ -826,10 +876,9 @@ const checkMatch = () => {
     gameScore.value += bonus
     storageManager.addStars(gameScore.value, 'matching_game')
     audioManager.playSuccess()
-    speakText('完成了，准备下一轮')
-    toast.success(`🎉 完成！得分：${gameScore.value}，+${gameScore.value}⭐`)
+    showPositiveFeedback('你真棒')
     loadUserData()
-    showTransition('配对完成！', '马上进入下一轮记忆挑战', '🎴')
+    showTransition('完成啦！', '马上进入下一轮记忆挑战', '👍')
     challengeRound.value++
     delayedActionTimer = setTimeout(() => {
       initMatchingGame()
@@ -903,23 +952,19 @@ const selectOption = (option: any) => {
     const points = 10 * combo.value
     gameScore.value += points
     audioManager.playSuccess()
-    speakText('答对了')
-    toast.success(`✅ 正确！+${points}分`)
+    showPositiveFeedback()
     questionCount.value++
 
     if (questionCount.value >= maxQuestionCount) {
       const reward = Math.max(5, Math.floor(gameScore.value / 5))
       storageManager.addStars(reward, `${selectedMode.value}_learning_game`)
-      toast.success(`🎉 挑战完成！+${reward}⭐`)
       loadUserData()
-      showTransition('这一轮完成啦！', '准备进入下一轮挑战', '🌟')
-      speakText('这一轮完成啦，准备下一轮')
+      showTransition('完成啦！', '准备进入下一轮挑战', '👍')
       challengeRound.value++
       delayedActionTimer = setTimeout(() => {
         initQuickGame()
       }, 1800)
     } else {
-      showTransition('答对啦！', `下一题马上开始（${questionCount.value}/${maxQuestionCount}）`, '✅')
       delayedActionTimer = setTimeout(() => {
         generateQuestion()
       }, 1500)
@@ -1264,54 +1309,6 @@ const speakText = (text: string) => {
       }
     }
 
-    // 大箭头导航
-    .nav-arrow {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #5DADE2, #85C1E9);
-      border: none;
-      font-size: 40px;
-      color: white;
-      cursor: pointer;
-      box-shadow: 0 4px 16px rgba(93, 173, 226, 0.4);
-      transition: all 0.3s;
-      z-index: 10;
-
-      &:hover {
-        transform: translateY(-50%) scale(1.15);
-        box-shadow: 0 6px 20px rgba(93, 173, 226, 0.5);
-      }
-
-      &:active {
-        transform: translateY(-50%) scale(1.05);
-      }
-
-      &.left {
-        left: 20px;
-      }
-
-      &.right {
-        right: 20px;
-      }
-
-      @media (max-width: 768px) {
-        width: 60px;
-        height: 60px;
-        font-size: 30px;
-
-        &.left {
-          left: 10px;
-        }
-
-        &.right {
-          right: 10px;
-        }
-      }
-    }
   }
 
   .content-nav {
@@ -1461,20 +1458,26 @@ const speakText = (text: string) => {
       }
 
       &.matched {
-        opacity: 0.5;
+        opacity: 1;
         pointer-events: none;
+        transform: rotateY(180deg);
       }
 
       .card-front,
-      .card-back {
+      .card-back,
+      .matched-face {
         position: absolute;
         width: 100%;
         height: 100%;
-        backface-visibility: hidden;
         display: flex;
         align-items: center;
         justify-content: center;
         border-radius: 16px;
+      }
+
+      .card-front,
+      .card-back {
+        backface-visibility: hidden;
       }
 
       .card-front {
@@ -1490,6 +1493,33 @@ const speakText = (text: string) => {
           width: 80%;
           height: 80%;
           object-fit: contain;
+        }
+      }
+
+      .matched-face {
+        inset: 0;
+        z-index: 3;
+        flex-direction: column;
+        background: linear-gradient(180deg, #FFFFFF, #F1FFE8);
+
+        img {
+          width: 82%;
+          height: 82%;
+          object-fit: contain;
+        }
+
+        .matched-mark {
+          position: absolute;
+          right: 8px;
+          bottom: 8px;
+          width: 30px;
+          height: 30px;
+          display: grid;
+          place-items: center;
+          border-radius: 50%;
+          background: #FFFFFF;
+          font-size: 18px;
+          box-shadow: 0 6px 14px rgba(82, 196, 26, 0.18);
         }
       }
     }
@@ -1700,22 +1730,22 @@ const speakText = (text: string) => {
 }
 
 .header {
-  margin: 18px 24px 0;
-  padding: 18px 28px;
-  border: 4px solid rgba(255, 255, 255, 0.78);
-  border-radius: 32px;
+  margin: 12px 18px 0;
+  padding: 10px 18px;
+  border: 3px solid rgba(255, 255, 255, 0.78);
+  border-radius: 24px;
   background: rgba(255, 255, 255, 0.84);
   box-shadow: 0 14px 36px rgba(255, 160, 190, 0.18);
   backdrop-filter: blur(10px);
 
   .btn-back,
   .star-count {
-    min-height: 64px;
+    min-height: 48px;
     border-radius: 999px;
   }
 
   .btn-back {
-    padding: 14px 26px;
+    padding: 8px 18px;
     background: linear-gradient(135deg, #FFFFFF, #F3FBFF);
     color: #4B6175;
     box-shadow: inset 0 -4px 0 rgba(93, 173, 226, 0.12), 0 8px 18px rgba(93, 173, 226, 0.14);
@@ -1723,7 +1753,13 @@ const speakText = (text: string) => {
 
   .page-title {
     color: #4A5F7A;
+    font-size: clamp(26px, 4vw, 34px);
     text-shadow: 0 3px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  .star-count {
+    padding: 8px 18px;
+    font-size: 18px;
   }
 
   .star-count {
@@ -1833,12 +1869,6 @@ const speakText = (text: string) => {
       }
     }
 
-    .nav-arrow {
-      width: 92px;
-      height: 92px;
-      background: linear-gradient(135deg, #8FD8FF, #B8E7FF);
-      box-shadow: inset 0 -7px 0 rgba(69, 152, 206, 0.2), 0 12px 24px rgba(93, 173, 226, 0.24);
-    }
   }
 
   .content-nav .nav-dots .dot {
@@ -1852,6 +1882,65 @@ const speakText = (text: string) => {
       background: #FF9FC2;
       transform: none;
     }
+  }
+
+  .explore-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .explore-control,
+  .content-index {
+    min-height: 44px;
+    border: 3px solid rgba(255, 255, 255, 0.82);
+    border-radius: 999px;
+    font-size: 17px;
+    font-weight: 900;
+    color: #4A5F7A;
+    box-shadow: 0 8px 18px rgba(116, 139, 170, 0.12);
+  }
+
+  .explore-control {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 118px;
+    padding: 8px 18px;
+    border-color: rgba(255, 255, 255, 0.88);
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+
+    &.prev {
+      background: linear-gradient(135deg, #FFFFFF, #EAF7FF);
+    }
+
+    &.next {
+      background: linear-gradient(135deg, #FFF1B8, #FFD8E6);
+    }
+
+    &:active {
+      transform: translateY(2px) scale(0.97);
+      box-shadow: 0 4px 10px rgba(116, 139, 170, 0.1);
+    }
+  }
+
+  .control-icon {
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .content-index {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 72px;
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.72);
+    font-size: 15px;
   }
 
   .action-buttons {
@@ -1963,8 +2052,10 @@ const speakText = (text: string) => {
     }
 
     &.matched {
-      opacity: 0.78;
+      opacity: 1;
       filter: saturate(1.15);
+      transform: rotateY(180deg) scale(1.02);
+      box-shadow: inset 0 -7px 0 rgba(82, 196, 26, 0.14), 0 12px 26px rgba(82, 196, 26, 0.16);
     }
   }
 }
@@ -2062,6 +2153,128 @@ const speakText = (text: string) => {
   }
 }
 
+.positive-feedback {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 46%, rgba(255, 243, 181, 0.42), transparent 34%),
+    radial-gradient(circle at 50% 52%, rgba(255, 176, 214, 0.18), transparent 42%);
+  animation: feedbackVeil 1.08s ease-out both;
+}
+
+.positive-card {
+  position: relative;
+  min-width: clamp(180px, 38vw, 280px);
+  padding: clamp(20px, 4vw, 32px) clamp(28px, 6vw, 46px) clamp(18px, 4vw, 28px);
+  border: 7px solid rgba(255, 255, 255, 0.94);
+  border-radius: 46px;
+  text-align: center;
+  background:
+    radial-gradient(circle at 28% 18%, rgba(255, 255, 255, 0.9), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 246, 198, 0.96));
+  box-shadow:
+    inset 0 -12px 0 rgba(255, 199, 92, 0.22),
+    inset 0 5px 0 rgba(255, 255, 255, 0.76),
+    0 26px 62px rgba(255, 184, 86, 0.3),
+    0 0 0 14px rgba(255, 255, 255, 0.18);
+  animation: thumbPop 1.08s cubic-bezier(0.2, 1.2, 0.28, 1) both;
+  overflow: visible;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    border-radius: 999px;
+    pointer-events: none;
+  }
+
+  &::before {
+    inset: -18px;
+    z-index: -1;
+    background: conic-gradient(from 20deg, rgba(255, 212, 96, 0), rgba(255, 212, 96, 0.36), rgba(255, 159, 194, 0.28), rgba(139, 216, 255, 0.24), rgba(255, 212, 96, 0));
+    filter: blur(5px);
+    animation: haloSpin 1.08s ease-out both;
+  }
+
+  &::after {
+    top: 12px;
+    left: 20%;
+    width: 44%;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.58);
+    transform: rotate(-8deg);
+  }
+}
+
+.positive-icon {
+  display: inline-grid;
+  place-items: center;
+  width: clamp(112px, 24vw, 174px);
+  height: clamp(112px, 24vw, 174px);
+  border-radius: 38px;
+  background: radial-gradient(circle at 35% 28%, #FFFFFF 0%, #FFF6C9 42%, #FFDFA3 100%);
+  font-size: clamp(76px, 18vw, 128px);
+  line-height: 1;
+  filter: drop-shadow(0 14px 18px rgba(76, 88, 110, 0.16));
+  box-shadow: inset 0 -8px 0 rgba(255, 170, 80, 0.16), 0 14px 28px rgba(255, 184, 86, 0.22);
+  animation: thumbWiggle 1.08s ease-out both;
+}
+
+.positive-text {
+  margin-top: 12px;
+  color: #3E5571;
+  font-size: clamp(30px, 7vw, 50px);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: 0.04em;
+  text-shadow: 0 3px 0 rgba(255, 255, 255, 0.86);
+}
+
+.positive-ribbon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  color: #FFFFFF;
+  font-size: clamp(14px, 3vw, 18px);
+  font-weight: 900;
+  background: linear-gradient(135deg, #FF9FC2, #FFB86B);
+  box-shadow: inset 0 -4px 0 rgba(207, 102, 119, 0.14), 0 8px 18px rgba(255, 159, 194, 0.22);
+}
+
+.spark {
+  position: absolute;
+  z-index: 2;
+  font-size: clamp(24px, 6vw, 38px);
+  filter: drop-shadow(0 8px 10px rgba(255, 184, 86, 0.22));
+  animation: sparklePop 1.08s ease-out both;
+}
+
+.spark-one {
+  top: -18px;
+  left: 18px;
+  animation-delay: 0.04s;
+}
+
+.spark-two {
+  top: 12px;
+  right: -14px;
+  animation-delay: 0.12s;
+}
+
+.spark-three {
+  left: -16px;
+  bottom: 34px;
+  animation-delay: 0.18s;
+}
+
 .change-mode-btn {
   min-height: 62px;
   border: 4px solid rgba(255, 255, 255, 0.78);
@@ -2072,16 +2285,16 @@ const speakText = (text: string) => {
 
 @media (max-width: 768px) {
   .header {
-    margin: 12px;
-    padding: 14px;
-    gap: 12px;
+    margin: 8px 10px 0;
+    padding: 8px 10px;
+    gap: 8px;
     flex-wrap: wrap;
 
     .page-title {
       order: 3;
       width: 100%;
       text-align: center;
-      font-size: 32px;
+      font-size: 26px;
     }
   }
 
@@ -2158,16 +2371,16 @@ const speakText = (text: string) => {
   }
 
   .header {
-    border-radius: 26px;
+    border-radius: 22px;
     flex-wrap: nowrap;
-    gap: 8px;
-    padding: 10px 12px;
+    gap: 6px;
+    padding: 7px 8px;
 
     .btn-back,
     .star-count {
-      min-height: 46px;
-      padding: 8px 12px;
-      font-size: 16px;
+      min-height: 38px;
+      padding: 6px 10px;
+      font-size: 14px;
       flex-shrink: 0;
     }
 
@@ -2175,7 +2388,7 @@ const speakText = (text: string) => {
       order: initial;
       width: auto;
       flex: 1;
-      font-size: 24px;
+      font-size: 21px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -2348,20 +2561,20 @@ const speakText = (text: string) => {
   }
 
   .header {
-    min-height: 64px;
-    margin-top: max(8px, env(safe-area-inset-top));
-    padding: 10px 18px;
-    border-radius: 24px;
+    min-height: 48px;
+    margin-top: max(6px, env(safe-area-inset-top));
+    padding: 7px 12px;
+    border-radius: 20px;
 
     .btn-back,
     .star-count {
-      min-height: 48px;
-      padding: 8px 16px;
-      font-size: 17px;
+      min-height: 38px;
+      padding: 6px 12px;
+      font-size: 14px;
     }
 
     .page-title {
-      font-size: clamp(26px, 4vw, 34px);
+      font-size: clamp(21px, 3.4vw, 30px);
     }
   }
 
@@ -2735,7 +2948,8 @@ const speakText = (text: string) => {
       border-radius: 22px;
 
       .card-front,
-      .card-back {
+      .card-back,
+      .matched-face {
         border-radius: 18px;
       }
 
@@ -2744,6 +2958,16 @@ const speakText = (text: string) => {
       }
 
       .card-back {
+        padding: 3px;
+
+        img {
+          width: 96%;
+          height: 96%;
+          transform: scale(1.12);
+        }
+      }
+
+      .matched-face {
         padding: 3px;
 
         img {
@@ -2809,6 +3033,29 @@ const speakText = (text: string) => {
       width: auto;
       min-width: 92px;
       max-width: none;
+    }
+
+    .explore-controls {
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .explore-control {
+      min-width: 98px;
+      min-height: 38px;
+      padding: 6px 12px;
+      font-size: 15px;
+    }
+
+    .content-index {
+      min-width: 58px;
+      min-height: 36px;
+      padding: 4px 10px;
+      font-size: 13px;
+    }
+
+    .control-icon {
+      font-size: 17px;
     }
   }
 }
@@ -2938,6 +3185,27 @@ const speakText = (text: string) => {
     .content-nav {
       display: none;
     }
+
+    .explore-controls {
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .explore-control {
+      min-width: 84px;
+      min-height: 34px;
+      padding: 5px 9px;
+      font-size: 13px;
+      border-width: 2px;
+    }
+
+    .content-index {
+      min-width: 48px;
+      min-height: 32px;
+      padding: 3px 8px;
+      font-size: 12px;
+      border-width: 2px;
+    }
   }
 
   .change-mode-btn {
@@ -3063,6 +3331,86 @@ const speakText = (text: string) => {
   }
   100% {
     transform: scale(1.03);
+  }
+}
+
+@keyframes thumbPop {
+  0% {
+    opacity: 0;
+    transform: translateY(22px) scale(0.68) rotate(-8deg);
+  }
+  28% {
+    opacity: 1;
+    transform: translateY(-4px) scale(1.1) rotate(4deg);
+  }
+  58% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(-2deg);
+  }
+  82% {
+    opacity: 1;
+    transform: translateY(0) scale(1.02) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-18px) scale(0.92) rotate(0deg);
+  }
+}
+
+@keyframes thumbWiggle {
+  0% {
+    transform: scale(0.74) rotate(-12deg);
+  }
+  30% {
+    transform: scale(1.12) rotate(8deg);
+  }
+  52% {
+    transform: scale(0.98) rotate(-4deg);
+  }
+  76%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes sparklePop {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.3) rotate(-20deg);
+  }
+  34% {
+    opacity: 1;
+    transform: translateY(-6px) scale(1.18) rotate(12deg);
+  }
+  72% {
+    opacity: 1;
+    transform: translateY(-14px) scale(1) rotate(-6deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-24px) scale(0.72) rotate(10deg);
+  }
+}
+
+@keyframes haloSpin {
+  0% {
+    opacity: 0;
+    transform: scale(0.78) rotate(0deg);
+  }
+  36% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.14) rotate(72deg);
+  }
+}
+
+@keyframes feedbackVeil {
+  0%, 100% {
+    opacity: 0;
+  }
+  24%, 76% {
+    opacity: 1;
   }
 }
 

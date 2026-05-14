@@ -4038,4 +4038,17 @@ const speakText = (text: string) => {
   }
 }
 
+
+@media (max-width: 480px) and (orientation: portrait) {
+  .explore-mode .content-stage .current-content .content-image {
+    width: min(56vw, 28dvh, 220px) !important;
+    height: min(56vw, 28dvh, 220px) !important;
+    margin-bottom: 12px !important;
+  }
+
+  .explore-mode .content-stage .current-content .content-image .tap-hint {
+    display: none !important;
+  }
+}
+
 </style>

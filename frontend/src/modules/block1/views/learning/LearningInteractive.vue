@@ -2387,6 +2387,10 @@ const speakText = (text: string) => {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
+  .explore-mode .content-nav {
+    display: none;
+  }
+
   .change-mode-btn {
     right: max(20px, env(safe-area-inset-right));
     bottom: calc(24px + env(safe-area-inset-bottom));
@@ -3421,6 +3425,166 @@ const speakText = (text: string) => {
   }
 }
 
+@media (orientation: landscape) and (min-width: 1025px) and (max-height: 1100px) {
+  .learning-interactive-page {
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .header {
+    flex-shrink: 0;
+    margin: max(12px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) 0 max(18px, env(safe-area-inset-left));
+    padding: 14px 22px;
+    border-radius: 28px;
+
+    .btn-back,
+    .star-count {
+      min-height: 52px;
+      padding: 9px 20px;
+      font-size: 18px;
+    }
+
+    .page-title {
+      font-size: clamp(32px, 3.2vw, 40px);
+    }
+  }
+
+  .mode-selection,
+  .interactive-area {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .mode-selection {
+    width: 100%;
+    max-width: none;
+    margin: 0 auto;
+    padding: 34px max(42px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(42px, env(safe-area-inset-left));
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    .mode-title {
+      margin-bottom: 34px;
+      font-size: clamp(38px, 4vw, 48px);
+      line-height: 1.08;
+    }
+
+    .mode-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 28px;
+    }
+
+    .mode-card {
+      min-height: 270px;
+      padding: 32px 20px;
+
+      .mode-icon {
+        margin-bottom: 16px;
+        font-size: clamp(70px, 7vw, 92px);
+      }
+
+      .mode-name {
+        margin-bottom: 12px;
+        font-size: clamp(26px, 2.6vw, 34px);
+      }
+
+      .mode-desc {
+        font-size: clamp(17px, 1.7vw, 21px);
+      }
+    }
+  }
+
+  .interactive-area {
+    width: 100%;
+    max-width: none;
+    padding: 22px max(36px, env(safe-area-inset-right)) calc(18px + env(safe-area-inset-bottom)) max(36px, env(safe-area-inset-left));
+    overflow: hidden;
+  }
+
+  .explore-mode {
+    height: 100%;
+    min-height: 0;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto auto;
+    gap: 8px;
+
+    .content-stage {
+      min-height: 0;
+      margin-bottom: 0;
+      padding: 24px 34px;
+      border-radius: 34px;
+      overflow: hidden;
+
+      .current-content {
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        display: grid;
+        grid-template-columns: minmax(360px, 0.95fr) minmax(320px, 1.05fr);
+        grid-template-rows: auto auto;
+        align-items: center;
+        justify-content: center;
+        column-gap: 42px;
+        text-align: left;
+
+        .content-image {
+          grid-row: 1 / span 2;
+          width: min(58dvh, 36vw, 500px);
+          height: min(58dvh, 36vw, 500px);
+          margin: 0 auto;
+          padding: clamp(14px, 2vw, 24px);
+
+          .tap-hint {
+            bottom: 10px;
+            font-size: 16px;
+          }
+        }
+
+        .content-name {
+          align-self: end;
+          margin: 0 0 12px;
+          font-size: clamp(48px, 5.2vw, 68px);
+          line-height: 1.05;
+          min-width: 0;
+        }
+
+        .content-desc {
+          align-self: start;
+          max-width: 100%;
+          min-width: 0;
+          margin: 0;
+          font-size: clamp(22px, 2.2vw, 30px);
+          line-height: 1.28;
+        }
+      }
+    }
+
+    .content-nav {
+      display: none;
+    }
+
+    .explore-controls {
+      margin: 0;
+    }
+
+    .action-buttons {
+      margin: 0;
+    }
+  }
+
+  .change-mode-btn {
+    right: max(24px, env(safe-area-inset-right));
+    bottom: calc(22px + env(safe-area-inset-bottom));
+    min-height: 50px;
+    padding: 9px 18px;
+    font-size: 18px;
+  }
+}
+
 @media (orientation: landscape) and (max-height: 430px) {
   .learning-interactive-page {
     height: 100dvh;
@@ -4114,8 +4278,13 @@ const speakText = (text: string) => {
     }
 
     .matching-grid {
-      width: min(calc(100vw - 88px), calc((100dvh - 86px) * 2));
+      width: min(calc(100vw - 88px), calc((100dvh - 98px) * 2));
       gap: 7px;
+    }
+
+    .memorize-phase .matching-grid {
+      width: min(calc(100vw - 88px), calc((100dvh - 122px) * 2));
+      gap: 4px;
     }
   }
 
@@ -4215,8 +4384,13 @@ const speakText = (text: string) => {
     }
 
     .matching-grid {
-      width: min(calc(100vw - 88px), calc((100dvh - 92px) * 2));
+      width: min(calc(100vw - 88px), calc((100dvh - 104px) * 2));
       gap: 8px;
+    }
+
+    .memorize-phase .matching-grid {
+      width: min(calc(100vw - 88px), calc((100dvh - 128px) * 2));
+      gap: 4px;
     }
   }
 

@@ -1,6 +1,7 @@
 // Toast 提示管理器
 
 import { createApp, h } from 'vue'
+// @ts-ignore
 import Toast from '@/modules/common/components/Toast.vue'
 
 interface ToastOptions {

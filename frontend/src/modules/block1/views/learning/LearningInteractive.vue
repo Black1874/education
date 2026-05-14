@@ -3218,6 +3218,86 @@ const speakText = (text: string) => {
   }
 }
 
+
+@media (max-width: 480px) and (orientation: portrait) {
+  .explore-mode {
+    min-height: 0;
+
+    .content-stage {
+      min-height: 0;
+      margin-bottom: 4px;
+      padding: 12px 14px 10px;
+      border-radius: 28px;
+
+      .current-content {
+        .content-image {
+          width: min(64vw, 32dvh, 250px);
+          height: min(64vw, 32dvh, 250px);
+          margin-bottom: 14px;
+          padding: 10px;
+
+          .tap-hint {
+            bottom: -28px;
+            font-size: 14px;
+          }
+        }
+
+        .content-name {
+          margin-top: 2px;
+          margin-bottom: 4px;
+          font-size: clamp(28px, 9vw, 36px);
+          line-height: 1.05;
+        }
+
+        .content-desc {
+          max-width: 100%;
+          padding: 5px 12px;
+          font-size: 15px;
+          line-height: 1.25;
+        }
+      }
+    }
+
+    .content-nav {
+      margin-bottom: 4px;
+
+      .nav-dots {
+        gap: 7px;
+      }
+    }
+
+    .explore-controls {
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .explore-control {
+      min-width: 94px;
+      min-height: 36px;
+      padding: 5px 10px;
+      font-size: 14px;
+    }
+
+    .content-index {
+      min-width: 58px;
+      min-height: 34px;
+      padding: 5px 10px;
+      font-size: 14px;
+    }
+
+    .action-buttons {
+      gap: 8px;
+    }
+
+    .action-btn.compact {
+      min-width: 72px;
+      min-height: 34px;
+      padding: 6px 12px;
+      font-size: 13px;
+    }
+  }
+}
+
 @media (orientation: landscape) and (min-width: 900px) and (max-height: 820px) {
   .interactive-area {
     padding-top: 10px;
@@ -3755,6 +3835,50 @@ const speakText = (text: string) => {
   }
 }
 
+@media (orientation: portrait) and (max-width: 768px) {
+  .explore-mode {
+    .content-stage {
+      padding: 14px 12px 16px;
+
+      .current-content {
+        .content-image {
+          width: min(320px, 72vw, 38dvh);
+          height: min(320px, 72vw, 38dvh);
+          margin-bottom: 18px;
+
+          .tap-hint {
+            bottom: 8px;
+            padding: 4px 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.88);
+            box-shadow: 0 6px 16px rgba(255, 139, 180, 0.18);
+            font-size: 15px;
+          }
+        }
+
+        .content-name {
+          margin-top: 0;
+          margin-bottom: 8px;
+          font-size: clamp(32px, 9vw, 40px);
+          line-height: 1.05;
+        }
+
+        .content-desc {
+          font-size: clamp(15px, 4vw, 18px);
+          line-height: 1.35;
+        }
+      }
+    }
+  }
+}
+
+@media (orientation: portrait) and (max-width: 420px) and (max-height: 760px) {
+  .explore-mode .content-stage .current-content .content-image {
+    width: min(280px, 66vw, 34dvh);
+    height: min(280px, 66vw, 34dvh);
+  }
+}
+
 @keyframes babyFloat {
   0%, 100% {
     transform: translateY(0);
@@ -3887,4 +4011,31 @@ const speakText = (text: string) => {
     transform: translateX(-50%) translateY(-10px);
   }
 }
+
+@media (max-width: 480px) and (orientation: portrait) {
+  .explore-mode .content-stage {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .explore-mode .content-stage .current-content .content-image {
+    width: min(56vw, 28dvh, 220px);
+    height: min(56vw, 28dvh, 220px);
+    margin-bottom: 12px;
+  }
+
+  .explore-mode .content-stage .current-content .content-image .tap-hint {
+    display: none;
+  }
+
+  .explore-mode .content-stage .current-content .content-name {
+    margin-top: 0;
+    font-size: clamp(28px, 8.5vw, 34px);
+  }
+
+  .explore-mode .content-stage .current-content .content-desc {
+    font-size: 15px;
+  }
+}
+
 </style>

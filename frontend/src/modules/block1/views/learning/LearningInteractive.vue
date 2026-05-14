@@ -731,10 +731,10 @@ const toggleAutoPlay = () => {
 
   if (isAutoPlay.value) {
     startAutoPlay()
-    toast.info('▶️ 自动播放已开启')
+    toast.info('▶️ 已开启')
   } else {
     stopAutoPlay()
-    toast.info('⏸️ 自动播放已关闭')
+    toast.info('⏸️ 已关闭')
   }
 }
 
@@ -4048,6 +4048,171 @@ const speakText = (text: string) => {
 
   .explore-mode .content-stage .current-content .content-image .tap-hint {
     display: none !important;
+  }
+}
+
+
+@media (orientation: landscape) and (max-height: 430px) {
+  .matching-mode {
+    .memorize-phase {
+      justify-content: flex-start;
+      padding-top: 4px;
+
+      .phase-title {
+        display: none;
+      }
+
+      .countdown {
+        margin-bottom: 8px;
+        font-size: clamp(34px, 8vw, 46px);
+      }
+    }
+
+    .matching-grid {
+      width: min(calc(100vw - 88px), calc((100dvh - 86px) * 2));
+      gap: 7px;
+    }
+  }
+
+  .quick-mode,
+  .sound-mode {
+    .question-area,
+    .sound-game {
+      grid-template-columns: minmax(190px, 0.88fr) minmax(0, 1.32fr);
+      gap: 8px 14px;
+
+      .voice-question-btn,
+      .play-sound-btn {
+        width: min(190px, 27vw);
+        height: min(116px, 32dvh);
+      }
+
+      .voice-question-btn .icon,
+      .play-sound-btn .icon {
+        font-size: clamp(38px, 7vw, 54px);
+      }
+
+      .voice-question-btn .text,
+      .play-sound-btn .text {
+        font-size: clamp(16px, 2.8vw, 21px);
+      }
+
+      .options-grid {
+        gap: 8px;
+
+        .option-card {
+          padding: 8px;
+          border-radius: 18px;
+
+          img {
+            max-height: min(132px, 35dvh);
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (orientation: landscape) and (max-height: 380px) {
+  .quick-mode,
+  .sound-mode {
+    .question-area,
+    .sound-game {
+      .voice-question-btn,
+      .play-sound-btn {
+        width: min(150px, 24vw);
+        height: min(96px, 30dvh);
+      }
+
+      .options-grid .option-card img {
+        max-height: min(102px, 31dvh);
+      }
+    }
+  }
+}
+
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .change-mode-btn {
+    left: max(8px, env(safe-area-inset-left));
+    right: auto;
+    bottom: calc(8px + env(safe-area-inset-bottom));
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    min-height: 42px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 0;
+  }
+
+  .change-mode-btn .change-icon {
+    font-size: 19px;
+  }
+
+  .change-mode-btn .change-text {
+    display: none;
+  }
+
+  .matching-mode {
+    .memorize-phase {
+      justify-content: flex-start;
+      padding-top: 4px;
+
+      .phase-title {
+        display: none;
+      }
+
+      .countdown {
+        margin-bottom: 8px;
+        font-size: clamp(34px, 8vw, 48px);
+      }
+    }
+
+    .matching-grid {
+      width: min(calc(100vw - 88px), calc((100dvh - 92px) * 2));
+      gap: 8px;
+    }
+  }
+
+  .quick-mode,
+  .sound-mode {
+    .question-area,
+    .sound-game {
+      grid-template-columns: minmax(190px, 0.82fr) minmax(0, 1.38fr);
+      gap: 10px 16px;
+
+      .voice-question-btn,
+      .play-sound-btn {
+        grid-row: 1 / span 2;
+        width: min(200px, 27vw);
+        height: min(126px, 30dvh);
+      }
+
+      .voice-question-btn .icon,
+      .play-sound-btn .icon {
+        font-size: clamp(42px, 7vw, 58px);
+      }
+
+      .voice-question-btn .text,
+      .play-sound-btn .text {
+        font-size: clamp(17px, 2.8vw, 22px);
+      }
+
+      .options-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+
+        .option-card {
+          padding: 9px;
+          border-radius: 20px;
+
+          img {
+            max-height: min(138px, 32dvh);
+          }
+        }
+      }
+    }
   }
 }
 

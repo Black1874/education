@@ -21,7 +21,7 @@ const icon = ref('')
 
 const iconMap = {
   success: '✅',
-  error: '❌',
+  error: '💡',
   info: 'ℹ️',
   warning: '⚠️'
 }

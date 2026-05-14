@@ -1,6 +1,6 @@
 // Toast 提示管理器
 
-import { createApp, h } from 'vue'
+import { createApp, h, type App } from 'vue'
 // @ts-ignore
 import Toast from '@/modules/common/components/Toast.vue'
 
@@ -12,8 +12,8 @@ interface ToastOptions {
 
 class ToastManager {
   private container: HTMLDivElement | null = null
-  private app: ReturnType<typeof createApp> | null = null
-  private timer: ReturnType<typeof setTimeout> | null = null
+  private app: App | null = null
+  private timer: number | null = null
 
   private getContainer() {
     if (!this.container) {
@@ -26,9 +26,13 @@ class ToastManager {
 
   show(options: ToastOptions) {
     const container = this.getContainer()
+    const normalizedOptions = {
+      ...options,
+      message: options.message.replace(/^[❌✕×]\s*/, '')
+    }
 
     if (this.timer) {
-      clearTimeout(this.timer)
+      window.clearTimeout(this.timer)
       this.timer = null
     }
 
@@ -43,7 +47,7 @@ class ToastManager {
     // 创建新的toast
     const app = createApp({
       render() {
-        return h(Toast, options)
+        return h(Toast, normalizedOptions)
       }
     })
 
@@ -51,12 +55,12 @@ class ToastManager {
     app.mount(container)
 
     // 自动销毁
-    this.timer = setTimeout(() => {
+    this.timer = window.setTimeout(() => {
       this.app?.unmount()
       this.app = null
       this.timer = null
       container.innerHTML = ''
-    }, (options.duration || 2000) + 500)
+    }, (normalizedOptions.duration || 2000) + 500)
   }
 
   success(message: string, duration?: number) {

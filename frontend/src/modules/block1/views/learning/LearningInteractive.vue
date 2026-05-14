@@ -865,7 +865,7 @@ const checkMatch = () => {
     card1.flipped = false
     card2.flipped = false
     audioManager.playError()
-    toast.error('❌ 再试试')
+    toast.error('再试试')
   }
 
   flippedCards = []

@@ -72,12 +72,36 @@ const toggleSound = () => {
 
 @media (orientation: landscape) and (max-height: 520px) {
   .sound-toggle {
-    width: 48px;
-    height: 48px;
-    bottom: calc(12px + env(safe-area-inset-bottom));
+    width: 40px;
+    height: 52px;
+    right: max(4px, env(safe-area-inset-right));
+    bottom: calc(50% + env(safe-area-inset-bottom) / 2);
+    border-radius: 18px 0 0 18px;
+    opacity: 0.88;
+    transform: translateY(50%);
 
     .icon {
       font-size: 24px;
+    }
+
+    &:hover {
+      transform: translateY(50%) scale(1.04);
+    }
+
+    &:active {
+      transform: translateY(50%) scale(0.96);
+    }
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  .sound-toggle {
+    width: 34px;
+    height: 46px;
+    right: max(2px, env(safe-area-inset-right));
+
+    .icon {
+      font-size: 20px;
     }
   }
 }

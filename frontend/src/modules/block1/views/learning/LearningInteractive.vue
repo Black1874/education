@@ -3359,7 +3359,7 @@ const speakText = (text: string) => {
   .mode-selection {
     width: 100%;
     margin: 0 auto;
-    padding: 6px max(10px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+    padding: 6px calc(max(10px, env(safe-area-inset-right)) + 42px) max(6px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -3400,7 +3400,7 @@ const speakText = (text: string) => {
   .interactive-area {
     width: 100%;
     max-width: none;
-    padding: 6px max(10px, env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+    padding: 6px calc(max(10px, env(safe-area-inset-right)) + 42px) calc(6px + env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
     overflow: hidden;
   }
 
@@ -3457,7 +3457,7 @@ const speakText = (text: string) => {
         height: 100%;
         min-height: 0;
         display: grid;
-        grid-template-columns: minmax(132px, 34dvh) minmax(0, 1fr);
+        grid-template-columns: minmax(230px, 38vw) minmax(140px, 1fr);
         grid-template-rows: auto auto;
         align-items: center;
         justify-content: center;
@@ -3466,8 +3466,8 @@ const speakText = (text: string) => {
 
         .content-image {
           grid-row: 1 / span 2;
-          width: min(44dvh, 30vw, 180px);
-          height: min(44dvh, 30vw, 180px);
+          width: min(64dvh, 36vw, 270px);
+          height: min(64dvh, 36vw, 270px);
           margin: 0 auto;
           padding: 8px;
 
@@ -3479,15 +3479,17 @@ const speakText = (text: string) => {
         .content-name {
           align-self: end;
           margin: 0 0 4px;
-          font-size: clamp(26px, 5vw, 38px);
+          font-size: clamp(24px, 4.4vw, 34px);
           line-height: 1.05;
+          min-width: 0;
         }
 
         .content-desc {
           align-self: start;
           max-width: 100%;
+          min-width: 0;
           margin: 0;
-          padding: 6px 12px;
+          padding: 4px 0;
           font-size: clamp(14px, 2.5vw, 17px);
           line-height: 1.22;
         }
@@ -3727,11 +3729,11 @@ const speakText = (text: string) => {
   }
 
   .explore-mode .content-stage .current-content {
-    grid-template-columns: minmax(112px, 31dvh) minmax(0, 1fr);
+    grid-template-columns: minmax(205px, 36vw) minmax(132px, 1fr);
 
     .content-image {
-      width: min(40dvh, 26vw, 150px);
-      height: min(40dvh, 26vw, 150px);
+      width: min(60dvh, 34vw, 245px);
+      height: min(60dvh, 34vw, 245px);
     }
   }
 

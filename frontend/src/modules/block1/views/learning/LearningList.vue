@@ -644,7 +644,7 @@ const goToCategory = (categoryId: string) => {
     width: 100%;
     max-width: none;
     min-height: 0;
-    padding: 8px max(10px, env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+    padding: 8px calc(max(10px, env(safe-area-inset-right)) + 42px) calc(8px + env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
     overflow: hidden;
   }
 

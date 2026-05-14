@@ -1,4 +1,4 @@
-﻿class AudioManager {
+class AudioManager {
   private sounds: Map<string, HTMLAudioElement> = new Map()
   private musicVolume: number = 0.5
   private effectVolume: number = 0.7
@@ -8,6 +8,7 @@
   private backgroundGain: GainNode | null = null
   private backgroundTimers: number[] = []
   private backgroundPlaying: boolean = false
+  private backgroundSongIndex: number = 0
 
   constructor() {
     const savedMusicVolume = localStorage.getItem('musicVolume')
@@ -158,17 +159,57 @@
     this.backgroundGain.gain.setValueAtTime(this.musicVolume * 0.16, context.currentTime)
     this.backgroundPlaying = true
 
-    const melody = [
-      261.63, 261.63, 392.00, 392.00, 440.00, 440.00, 392.00,
-      349.23, 349.23, 329.63, 329.63, 293.66, 293.66, 261.63
+    const songs = [
+      {
+        name: '???',
+        melody: [
+          261.63, 261.63, 392.00, 392.00, 440.00, 440.00, 392.00,
+          349.23, 349.23, 329.63, 329.63, 293.66, 293.66, 261.63
+        ],
+        durations: [0.46, 0.46, 0.46, 0.46, 0.46, 0.46, 0.86, 0.46, 0.46, 0.46, 0.46, 0.46, 0.46, 0.92]
+      },
+      {
+        name: '????',
+        melody: [
+          261.63, 293.66, 329.63, 261.63, 261.63, 293.66, 329.63, 261.63,
+          329.63, 349.23, 392.00, 329.63, 349.23, 392.00
+        ],
+        durations: [0.38, 0.38, 0.38, 0.38, 0.38, 0.38, 0.38, 0.38, 0.38, 0.38, 0.76, 0.38, 0.38, 0.76]
+      },
+      {
+        name: '???????',
+        melody: [
+          329.63, 293.66, 261.63, 293.66, 329.63, 329.63, 329.63,
+          293.66, 293.66, 293.66, 329.63, 392.00, 392.00
+        ],
+        durations: [0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.82, 0.42, 0.42, 0.82, 0.42, 0.42, 0.82]
+      },
+      {
+        name: '???',
+        melody: [
+          392.00, 440.00, 392.00, 349.23, 329.63, 349.23, 392.00,
+          293.66, 329.63, 349.23, 329.63, 349.23, 392.00
+        ],
+        durations: [0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.82, 0.42, 0.42, 0.42, 0.42, 0.42, 0.82]
+      },
+      {
+        name: '???',
+        melody: [
+          392.00, 392.00, 440.00, 392.00, 392.00, 440.00,
+          392.00, 440.00, 523.25, 493.88, 440.00, 392.00
+        ],
+        durations: [0.64, 0.32, 0.72, 0.64, 0.32, 0.72, 0.42, 0.42, 0.64, 0.42, 0.42, 0.9]
+      }
     ]
-    const durations = [0.46, 0.46, 0.46, 0.46, 0.46, 0.46, 0.86, 0.46, 0.46, 0.46, 0.46, 0.46, 0.46, 0.92]
 
     const playLoop = () => {
       if (!this.backgroundPlaying || !this.backgroundAudioContext || !this.backgroundGain) return
 
+      const song = songs[this.backgroundSongIndex % songs.length]
+      this.backgroundSongIndex++
       let offset = 0
-      melody.forEach((frequency, index) => {
+
+      song.melody.forEach((frequency, index) => {
         const oscillator = context.createOscillator()
         const noteGain = context.createGain()
         oscillator.type = 'sine'
@@ -176,13 +217,14 @@
         oscillator.connect(noteGain)
         noteGain.connect(this.backgroundGain!)
         const start = context.currentTime + offset
-        const end = start + durations[index]
+        const duration = song.durations[index] ?? 0.45
+        const end = start + duration
         noteGain.gain.setValueAtTime(0.0001, start)
         noteGain.gain.exponentialRampToValueAtTime(0.7, start + 0.04)
         noteGain.gain.exponentialRampToValueAtTime(0.0001, end)
         oscillator.start(start)
         oscillator.stop(end + 0.02)
-        offset += durations[index]
+        offset += duration
       })
 
       const timer = window.setTimeout(playLoop, (offset + 1.2) * 1000)

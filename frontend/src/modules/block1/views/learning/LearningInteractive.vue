@@ -540,6 +540,7 @@ const transitionIcon = ref('🎉')
 const positiveFeedbackVisible = ref(false)
 const positiveFeedbackText = ref('你真棒')
 const positiveFeedbackIcon = ref('👍')
+const positiveFeedbackMessages = ['你真棒!', '继续加油!', '你真厉害!', 'Good!']
 let gameTimer: any = null
 let memorizeTimer: any = null
 let delayedActionTimer: any = null
@@ -591,11 +592,12 @@ const showTransition = (message: string, subMessage: string, icon = '🎉') => {
   transitionIcon.value = icon
 }
 
-const showPositiveFeedback = (text = '你真棒', icon = '👍') => {
-  positiveFeedbackText.value = text
+const showPositiveFeedback = (text?: string, icon = '👍') => {
+  const message = text || positiveFeedbackMessages[Math.floor(Math.random() * positiveFeedbackMessages.length)]
+  positiveFeedbackText.value = message
   positiveFeedbackIcon.value = icon
   positiveFeedbackVisible.value = true
-  speakText('你真棒')
+  speakText(message)
 
   if (feedbackTimer) {
     clearTimeout(feedbackTimer)
@@ -876,7 +878,7 @@ const checkMatch = () => {
     gameScore.value += bonus
     storageManager.addStars(gameScore.value, 'matching_game')
     audioManager.playSuccess()
-    showPositiveFeedback('你真棒')
+    showPositiveFeedback()
     loadUserData()
     showTransition('完成啦！', '马上进入下一轮记忆挑战', '👍')
     challengeRound.value++
@@ -974,7 +976,7 @@ const selectOption = (option: any) => {
     combo.value = 0
     audioManager.playError()
     speakText('再想想')
-    toast.error('❌ 再想想')
+    toast.error('再想想')
     delayedActionTimer = setTimeout(() => {
       isAnswerLocked.value = false
       clearTransition()

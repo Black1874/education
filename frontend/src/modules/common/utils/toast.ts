@@ -11,6 +11,8 @@ interface ToastOptions {
 
 class ToastManager {
   private container: HTMLDivElement | null = null
+  private app: ReturnType<typeof createApp> | null = null
+  private timer: ReturnType<typeof setTimeout> | null = null
 
   private getContainer() {
     if (!this.container) {
@@ -24,6 +26,16 @@ class ToastManager {
   show(options: ToastOptions) {
     const container = this.getContainer()
 
+    if (this.timer) {
+      clearTimeout(this.timer)
+      this.timer = null
+    }
+
+    if (this.app) {
+      this.app.unmount()
+      this.app = null
+    }
+
     // 清除之前的toast
     container.innerHTML = ''
 
@@ -34,11 +46,15 @@ class ToastManager {
       }
     })
 
+    this.app = app
     app.mount(container)
 
     // 自动销毁
-    setTimeout(() => {
-      app.unmount()
+    this.timer = setTimeout(() => {
+      this.app?.unmount()
+      this.app = null
+      this.timer = null
+      container.innerHTML = ''
     }, (options.duration || 2000) + 500)
   }
 

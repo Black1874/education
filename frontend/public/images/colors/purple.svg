@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <circle cx="256" cy="256" r="200" fill="#800080"/>
-  <text x="256" y="440" font-size="36" text-anchor="middle" fill="#fff" font-weight="bold">紫色 Purple</text>
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generator: visioncortex VTracer 0.6.12 -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="375" height="331">
+<path d="M0 0 C123.75 0 247.5 0 375 0 C375 109.23 375 218.46 375 331 C251.25 331 127.5 331 0 331 C0 221.77 0 112.54 0 0 Z " fill="#704FAD" transform="translate(0,0)"/>
+<path d="M0 0 C123.75 0 247.5 0 375 0 C375 109.23 375 218.46 375 331 C373.68 331 372.36 331 371 331 C371 223.09 371 115.18 371 4 C248.57 4 126.14 4 0 4 C0 2.68 0 1.36 0 0 Z " fill="#FBFAFC" transform="translate(0,0)"/>
 </svg>

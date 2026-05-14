@@ -1,4 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <circle cx="256" cy="256" r="200" fill="#00FF00"/>
-  <text x="256" y="440" font-size="36" text-anchor="middle" fill="#333" font-weight="bold">绿色 Green</text>
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generator: visioncortex VTracer 0.6.12 -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="375" height="331">
+<path d="M0 0 C123.75 0 247.5 0 375 0 C375 109.23 375 218.46 375 331 C251.25 331 127.5 331 0 331 C0 221.77 0 112.54 0 0 Z " fill="#02A64A" transform="translate(0,0)"/>
+<path d="M0 0 C123.75 0 247.5 0 375 0 C375 109.23 375 218.46 375 331 C251.25 331 127.5 331 0 331 C0 221.77 0 112.54 0 0 Z M2 3 C2 110.91 2 218.82 2 330 C124.1 330 246.2 330 372 330 C372 222.09 372 114.18 372 3 C249.9 3 127.8 3 2 3 Z " fill="#D0ECD9" transform="translate(0,0)"/>
+<path d="M0 0 C0.99 0 1.98 0 3 0 C3 0.99 3 1.98 3 3 C115.2 3 227.4 3 343 3 C343 3.33 343 3.66 343 4 C229.81 4 116.62 4 0 4 C0 2.68 0 1.36 0 0 Z " fill="#0A9C4D" transform="translate(4,326)"/>
 </svg>

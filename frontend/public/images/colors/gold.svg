@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <circle cx="256" cy="256" r="200" fill="#FFD700"/>
-  <text x="256" y="440" font-size="36" text-anchor="middle" fill="#333" font-weight="bold">金色 Gold</text>
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generator: visioncortex VTracer 0.6.12 -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="375" height="331">
+<path d="M0 0 C123.75 0 247.5 0 375 0 C375 109.23 375 218.46 375 331 C251.25 331 127.5 331 0 331 C0 221.77 0 112.54 0 0 Z " fill="#EFB341" transform="translate(0,0)"/>
+<path d="M0 0 C1.65 0 3.3 0 5 0 C5 107.91 5 215.82 5 327 C127.1 327 249.2 327 375 327 C375 328.32 375 329.64 375 331 C251.25 331 127.5 331 0 331 C0 221.77 0 112.54 0 0 Z " fill="#FCF8EE" transform="translate(0,0)"/>
 </svg>

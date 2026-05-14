@@ -859,13 +859,11 @@ const checkMatch = () => {
     card2.flipped = true
     gameScore.value += 10
     audioManager.playSuccess()
-    showPositiveFeedback()
   } else {
     // 配对失败
     card1.flipped = false
     card2.flipped = false
     audioManager.playError()
-    toast.error('再试试')
   }
 
   flippedCards = []
@@ -878,8 +876,8 @@ const checkMatch = () => {
     gameScore.value += bonus
     storageManager.addStars(gameScore.value, 'matching_game')
     audioManager.playSuccess()
-    showPositiveFeedback()
     loadUserData()
+    showPositiveFeedback('完成啦，真棒！', '👍')
     showTransition('完成啦！', '马上进入下一轮记忆挑战', '👍')
     challengeRound.value++
     delayedActionTimer = setTimeout(() => {
@@ -954,13 +952,13 @@ const selectOption = (option: any) => {
     const points = 10 * combo.value
     gameScore.value += points
     audioManager.playSuccess()
-    showPositiveFeedback()
     questionCount.value++
 
     if (questionCount.value >= maxQuestionCount) {
       const reward = Math.max(5, Math.floor(gameScore.value / 5))
       storageManager.addStars(reward, `${selectedMode.value}_learning_game`)
       loadUserData()
+      showPositiveFeedback('这一关完成啦！', '🌟')
       showTransition('完成啦！', '准备进入下一轮挑战', '👍')
       challengeRound.value++
       delayedActionTimer = setTimeout(() => {
@@ -976,7 +974,6 @@ const selectOption = (option: any) => {
     combo.value = 0
     audioManager.playError()
     speakText('再想想')
-    toast.error('再想想')
     delayedActionTimer = setTimeout(() => {
       isAnswerLocked.value = false
       clearTransition()
@@ -1110,6 +1107,9 @@ const playTargetSound = () => {
 
 // 语音合成工具
 const speakText = (text: string) => {
+  const voiceVolume = audioManager.getVolume()
+  if (voiceVolume <= 0) return
+
   if ('speechSynthesis' in window) {
     // 取消之前的语音
     window.speechSynthesis.cancel()

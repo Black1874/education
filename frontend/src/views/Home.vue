@@ -10,8 +10,36 @@
           <span class="star-icon">⭐</span>
           <span class="count">{{ totalStars }}</span>
         </div>
-        <div class="user-avatar" @click="showUserMenu = !showUserMenu">
-          <span>👦</span>
+        <div class="user-menu-wrap">
+          <button class="user-avatar" @click="toggleUserMenu" aria-label="打开用户菜单">
+            <span>👦</span>
+          </button>
+          <div v-if="showUserMenu" class="user-menu polished-panel">
+            <label class="menu-item volume-item">
+              <span>音量调节</span>
+              <strong>{{ Math.round(volume * 100) }}%</strong>
+              <input
+                v-model.number="volume"
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                @input="updateVolume"
+              />
+            </label>
+            <label class="menu-item switch-item">
+              <span>背景音乐</span>
+              <input
+                v-model="backgroundMusicEnabled"
+                class="switch-input"
+                type="checkbox"
+                @change="toggleBackgroundMusic"
+              />
+              <span class="switch-track" aria-hidden="true">
+                <span class="switch-thumb"></span>
+              </span>
+            </label>
+          </div>
         </div>
       </div>
     </header>
@@ -88,6 +116,8 @@ const nickname = ref('小宝贝')
 const totalStars = ref(0)
 const availableStars = ref(0)
 const showUserMenu = ref(false)
+const volume = ref(audioManager.getVolume())
+const backgroundMusicEnabled = ref(audioManager.getBackgroundMusicEnabled())
 
 // 宠物数据（从本地存储加载）
 const showPet = ref(true)
@@ -124,6 +154,19 @@ const goToGames = () => {
 }
 
 // 喂养宠物（带音效和本地存储）
+const toggleUserMenu = () => {
+  audioManager.playClick()
+  showUserMenu.value = !showUserMenu.value
+}
+
+const updateVolume = () => {
+  audioManager.setVolume(volume.value)
+}
+
+const toggleBackgroundMusic = () => {
+  audioManager.setBackgroundMusicEnabled(backgroundMusicEnabled.value)
+}
+
 const feedPet = () => {
   audioManager.playClick()
 
@@ -151,6 +194,9 @@ const feedPet = () => {
   padding: 20px 40px;
   background: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  position: relative;
+  z-index: 10000;
+  overflow: visible;
 
   .logo {
     font-size: 32px;
@@ -163,6 +209,7 @@ const feedPet = () => {
     display: flex;
     align-items: center;
     gap: 20px;
+    position: relative;
   }
 
   .star-count {
@@ -182,6 +229,11 @@ const feedPet = () => {
     }
   }
 
+  .user-menu-wrap {
+    position: relative;
+    z-index: 10001;
+  }
+
   .user-avatar {
     width: 60px;
     height: 60px;
@@ -192,11 +244,86 @@ const feedPet = () => {
     justify-content: center;
     font-size: 32px;
     cursor: pointer;
+    border: none;
     transition: transform 0.3s;
 
     &:hover {
       transform: scale(1.1);
     }
+  }
+
+  .user-menu {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    z-index: 10002;
+    width: 260px;
+    padding: 16px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 16px 40px rgba(44, 62, 80, 0.18);
+  }
+
+  .menu-item {
+    display: grid;
+    gap: 8px;
+    padding: 12px;
+    color: #2C3E50;
+    font-size: 16px;
+    font-weight: 800;
+  }
+
+  .volume-item {
+    grid-template-columns: 1fr auto;
+
+    input {
+      grid-column: 1 / -1;
+      width: 100%;
+      accent-color: #5DADE2;
+    }
+  }
+
+  .switch-item {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .switch-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .switch-track {
+    position: relative;
+    width: 58px;
+    height: 32px;
+    border-radius: 999px;
+    background: #DCE6F2;
+    box-shadow: inset 0 2px 6px rgba(44, 62, 80, 0.16);
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .switch-thumb {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 3px 8px rgba(44, 62, 80, 0.22);
+    transition: transform 0.2s ease;
+  }
+
+  .switch-input:checked + .switch-track {
+    background: linear-gradient(135deg, #5DADE2, #7DD6C8);
+    box-shadow: 0 6px 14px rgba(93, 173, 226, 0.28);
+  }
+
+  .switch-input:checked + .switch-track .switch-thumb {
+    transform: translateX(26px);
   }
 }
 

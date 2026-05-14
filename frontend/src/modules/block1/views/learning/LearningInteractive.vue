@@ -3549,6 +3549,7 @@ const speakText = (text: string) => {
       display: flex;
       flex-direction: column;
       justify-content: center;
+      overflow: hidden;
     }
 
     .memorize-phase {
@@ -3580,7 +3581,7 @@ const speakText = (text: string) => {
     }
 
     .matching-grid {
-      width: min(92vw, calc((100dvh - 78px) * 2));
+      width: min(calc(100vw - 88px), calc((100dvh - 126px) * 2));
       max-width: none;
       gap: 5px;
       grid-template-columns: repeat(4, minmax(0, 1fr));

@@ -3,7 +3,7 @@
     <!-- 顶部导航 -->
     <header class="header polished-panel">
       <div class="header-left">
-        <h1 class="logo">🎈 儿童教育平台</h1>
+        <h1 class="logo">🎈 宝宝启蒙</h1>
       </div>
       <div class="header-right">
         <div class="star-count">
@@ -172,11 +172,11 @@ const feedPet = () => {
 
   if (storageManager.feedPet(10)) {
     audioManager.playSuccess()
-    toast.success('🎉 小熊猫吃饱啦！')
+    toast.success('小熊猫吃饱啦！')
     loadUserData() // 刷新数据
   } else {
     audioManager.playError()
-    toast.warning('⭐ 星星不够啦，快去学习和玩游戏赚星星吧！')
+    toast.warning('星星不够啦，快去学习和玩游戏赚星星吧！')
   }
 }
 </script>

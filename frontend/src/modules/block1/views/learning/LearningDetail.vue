@@ -192,7 +192,7 @@ const closeModal = () => {
 const playSound = () => {
   if (selectedContent.value) {
     audioManager.playSuccess()
-    toast.info(`🔊 ${selectedContent.value.name}`)
+    toast.info(selectedContent.value.name)
   }
 }
 
@@ -209,7 +209,7 @@ const toggleFavorite = () => {
       selectedContent.value.isFavorite = true
       storageManager.addStars(2, `favorite_${selectedContent.value.id}`)
       audioManager.playSuccess()
-      toast.success('❤️ 收藏成功！+2⭐')
+    toast.success('收藏成功！+2⭐')
     }
   }
 }

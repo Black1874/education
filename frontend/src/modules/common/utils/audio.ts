@@ -153,6 +153,9 @@ class AudioManager {
     if (!this.backgroundMusicEnabled || this.isMuted || this.musicVolume <= 0 || this.backgroundPlaying) return
 
     const context = this.backgroundAudioContext || this.getAudioContext()
+    if (context.state === 'suspended') {
+      context.resume().catch(err => console.warn('Background music resume failed:', err))
+    }
     this.backgroundAudioContext = context
     this.backgroundGain = this.backgroundGain || context.createGain()
     this.backgroundGain.connect(context.destination)
@@ -286,6 +289,7 @@ class AudioManager {
 
   playClick() {
     if (this.isMuted || this.effectVolume <= 0) return
+    this.playBackgroundMusic()
     const audioContext = this.getAudioContext()
     const oscillator = audioContext.createOscillator()
     const gainNode = audioContext.createGain()
@@ -302,6 +306,7 @@ class AudioManager {
 
   playSuccess() {
     if (this.isMuted || this.effectVolume <= 0) return
+    this.playBackgroundMusic()
     const audioContext = this.getAudioContext()
     const oscillator = audioContext.createOscillator()
     const gainNode = audioContext.createGain()
@@ -320,6 +325,7 @@ class AudioManager {
 
   playError() {
     if (this.isMuted || this.effectVolume <= 0) return
+    this.playBackgroundMusic()
     const audioContext = this.getAudioContext()
     const oscillator = audioContext.createOscillator()
     const gainNode = audioContext.createGain()

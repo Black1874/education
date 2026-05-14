@@ -47,6 +47,15 @@
             <div class="content-image" @click="playContentSound">
               <img :src="currentContent.imageUrl" :alt="currentContent.name" />
               <div class="tap-hint">点击我！</div>
+              <button
+                class="image-autoplay-toggle"
+                :class="{ active: isAutoPlay }"
+                @click.stop="toggleAutoPlay"
+                :aria-label="isAutoPlay ? '关闭自动播放' : '开启自动播放'"
+              >
+                <span>{{ isAutoPlay ? '⏸' : '▶' }}</span>
+                <span>自动</span>
+              </button>
             </div>
             <h2 class="content-name">{{ currentContent.name }}</h2>
             <p class="content-desc">{{ currentContent.description }}</p>
@@ -81,30 +90,12 @@
             <span class="control-icon">🌈</span>
           </button>
         </div>
-
-        <!-- 操作按钮 -->
-        <div class="action-buttons">
-          <button class="action-btn play compact" @click="playContentSound" aria-label="播放声音">
-            <span>🔊</span>
-            <span>声音</span>
-          </button>
-          <button
-            class="action-btn autoplay compact"
-            :class="{ active: isAutoPlay }"
-            @click="toggleAutoPlay"
-            :aria-label="isAutoPlay ? '暂停自动播放' : '开始自动播放'"
-          >
-            <span>{{ isAutoPlay ? '⏸️' : '▶️' }}</span>
-            <span>{{ isAutoPlay ? '暂停' : '自动' }}</span>
-          </button>
-        </div>
       </div>
 
       <!-- 配对游戏模式 -->
       <div v-else-if="selectedMode === 'matching'" class="matching-mode">
         <!-- 记忆阶段 - 展示所有卡片 -->
         <div v-if="matchingPhase === 'memorize'" class="memorize-phase">
-          <h2 class="phase-title">第 {{ challengeRound }} 轮：记住它们的位置</h2>
           <div class="countdown">{{ memorizeCountdown }}秒</div>
           <div class="matching-grid preview">
             <div
@@ -155,7 +146,6 @@
         <div class="game-info">
           <div class="round">第 {{ challengeRound }} 轮</div>
           <div class="score">得分: {{ gameScore }}</div>
-          <div class="combo">连击: {{ combo }}x</div>
           <div class="progress">题目: {{ questionCount }}/{{ maxQuestionCount }}</div>
         </div>
 
@@ -198,8 +188,7 @@
 
         <div class="sound-game">
           <button class="play-sound-btn" @click="playTargetSound">
-            <span class="icon">🔊</span>
-            <span class="text">播放声音</span>
+            <span class="icon">▶</span>
           </button>
 
           <h2 class="question">
@@ -731,10 +720,10 @@ const toggleAutoPlay = () => {
 
   if (isAutoPlay.value) {
     startAutoPlay()
-    toast.info('▶️ 已开启')
+    toast.info('自动播放已开启')
   } else {
     stopAutoPlay()
-    toast.info('⏸️ 已关闭')
+    toast.info('自动播放已关闭')
   }
 }
 
@@ -760,7 +749,7 @@ const playContentSound = () => {
     speakText(currentContent.value.name)
     if (storageManager.markContentLearned(currentContent.value.id)) {
       storageManager.addStars(5, `learn_${currentContent.value.id}`)
-      toast.success('⭐ 第一次学会啦！+5⭐')
+      toast.success('第一次学会啦！+5⭐')
       loadUserData()
     }
   }
@@ -1285,6 +1274,41 @@ const speakText = (text: string) => {
           object-fit: contain;
         }
 
+        .image-autoplay-toggle {
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          z-index: 2;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 4px;
+          min-width: 68px;
+          min-height: 34px;
+          padding: 6px 10px;
+          border: 2px solid rgba(255, 255, 255, 0.78);
+          border-radius: 999px;
+          background: rgba(93, 173, 226, 0.58);
+          color: white;
+          font-size: 14px;
+          font-weight: 800;
+          box-shadow: 0 8px 18px rgba(93, 173, 226, 0.22);
+          backdrop-filter: blur(8px);
+          cursor: pointer;
+          opacity: 0.76;
+          transition: transform 0.2s, opacity 0.2s, background 0.2s;
+
+          &:hover,
+          &:focus-visible {
+            opacity: 0.95;
+            transform: scale(1.04);
+          }
+
+          &.active {
+            background: rgba(255, 166, 77, 0.68);
+          }
+        }
+
         .tap-hint {
           position: absolute;
           bottom: -40px;
@@ -1599,7 +1623,9 @@ const speakText = (text: string) => {
       }
 
       .icon {
-        font-size: 80px;
+        margin-left: 8px;
+        font-size: 86px;
+        line-height: 1;
       }
 
       .text {
@@ -4028,6 +4054,16 @@ const speakText = (text: string) => {
     display: none;
   }
 
+  .explore-mode .content-stage .current-content .content-image .image-autoplay-toggle {
+    top: 6px;
+    right: 6px;
+    min-width: 54px;
+    min-height: 28px;
+    padding: 4px 7px;
+    font-size: 12px;
+    opacity: 0.7;
+  }
+
   .explore-mode .content-stage .current-content .content-name {
     margin-top: 0;
     font-size: clamp(28px, 8.5vw, 34px);
@@ -4048,6 +4084,15 @@ const speakText = (text: string) => {
 
   .explore-mode .content-stage .current-content .content-image .tap-hint {
     display: none !important;
+  }
+
+  .explore-mode .content-stage .current-content .content-image .image-autoplay-toggle {
+    top: 6px !important;
+    right: 6px !important;
+    min-width: 54px !important;
+    min-height: 28px !important;
+    padding: 4px 7px !important;
+    font-size: 12px !important;
   }
 }
 
@@ -4213,6 +4258,32 @@ const speakText = (text: string) => {
         }
       }
     }
+  }
+}
+
+@media (max-width: 480px) and (orientation: portrait) {
+  .explore-mode .content-stage .current-content .content-image .tap-hint {
+    display: none !important;
+  }
+
+  .explore-mode .content-stage .current-content .content-image .image-autoplay-toggle {
+    top: 6px !important;
+    right: 6px !important;
+    min-width: 54px !important;
+    min-height: 28px !important;
+    padding: 4px 7px !important;
+    font-size: 12px !important;
+  }
+}
+
+@media (min-width: 700px) and (orientation: landscape) {
+  .explore-mode .content-stage .current-content .content-image {
+    margin-bottom: 28px !important;
+  }
+
+  .explore-mode .content-stage .current-content .content-image .tap-hint {
+    bottom: 14px !important;
+    font-size: 16px !important;
   }
 }
 

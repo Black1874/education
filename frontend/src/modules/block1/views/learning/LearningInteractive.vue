@@ -734,7 +734,7 @@ const startAutoPlay = () => {
   stopAutoPlay()
   autoPlayTimer = setInterval(() => {
     nextContent()
-  }, 5000) // 每5秒切换
+  }, 3000) // 每3秒切换
 }
 
 const stopAutoPlay = () => {

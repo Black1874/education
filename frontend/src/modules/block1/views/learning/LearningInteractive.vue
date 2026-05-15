@@ -150,11 +150,13 @@
         </div>
 
         <div class="question-area">
-          <!-- 语音播放按钮 -->
-          <button class="voice-question-btn" @click="playQuestionVoice">
-            <span class="icon">🔊</span>
-            <span class="text">请找出：{{ targetName }}</span>
-          </button>
+          <!-- 语音提示 -->
+          <div class="prompt-bar quick-prompt">
+            <span class="prompt-text">请找出：{{ targetName }}</span>
+            <button class="voice-question-btn" @click="playQuestionVoice" aria-label="播放题目声音">
+              <span class="icon">🔊</span>
+            </button>
+          </div>
 
           <div class="options-grid">
             <div
@@ -187,23 +189,24 @@
         </div>
 
         <div class="sound-game">
-          <button class="play-sound-btn" @click="playTargetSound">
-            <span class="icon">▶</span>
-          </button>
-
-          <h2 class="question">
-            {{
-              categoryInfo.id === 'animal' ? '这是什么动物？' :
-              categoryInfo.id === 'fruit' ? '这是什么水果？' :
-              categoryInfo.id === 'vegetable' ? '这是什么蔬菜？' :
-              categoryInfo.id === 'color' ? '这是什么颜色？' :
-              categoryInfo.id === 'shape' ? '这是什么形状？' :
-              categoryInfo.id === 'number' ? '这是数字几？' :
-              categoryInfo.id === 'letter' ? '这是字母什么？' :
-              categoryInfo.id === 'vehicle' ? '这是什么交通工具？' :
-              '这是什么？'
-            }}
-          </h2>
+          <div class="prompt-bar sound-prompt">
+            <h2 class="question">
+              {{
+                categoryInfo.id === 'animal' ? '这是什么动物？' :
+                categoryInfo.id === 'fruit' ? '这是什么水果？' :
+                categoryInfo.id === 'vegetable' ? '这是什么蔬菜？' :
+                categoryInfo.id === 'color' ? '这是什么颜色？' :
+                categoryInfo.id === 'shape' ? '这是什么形状？' :
+                categoryInfo.id === 'number' ? '这是数字几？' :
+                categoryInfo.id === 'letter' ? '这是字母什么？' :
+                categoryInfo.id === 'vehicle' ? '这是什么交通工具？' :
+                '这是什么？'
+              }}
+            </h2>
+            <button class="play-sound-btn" @click="playTargetSound" aria-label="播放声音">
+              <span class="icon">▶</span>
+            </button>
+          </div>
 
           <div class="options-grid">
             <div
@@ -1569,18 +1572,39 @@ const speakText = (text: string) => {
   .sound-game {
     text-align: center;
 
+    .prompt-bar {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      max-width: min(1000px, 92vw);
+      margin: 0 auto 24px;
+      padding: 8px 10px 8px 20px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: 0 10px 24px rgba(116, 139, 170, 0.12);
+    }
+
+    .prompt-text,
+    .question {
+      margin: 0;
+      color: #4A5F7A;
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight: 900;
+      line-height: 1.1;
+    }
+
     .voice-question-btn {
-      width: 300px;
-      height: 120px;
-      border-radius: 24px;
+      width: clamp(54px, 7vw, 78px);
+      height: clamp(54px, 7vw, 78px);
+      min-width: clamp(54px, 7vw, 78px);
+      border-radius: 50%;
       background: linear-gradient(135deg, #5DADE2, #85C1E9);
       border: none;
       cursor: pointer;
-      margin: 0 auto 40px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 16px;
       box-shadow: 0 8px 24px rgba(93, 173, 226, 0.4);
       transition: all 0.3s;
       animation: pulse 2s infinite;
@@ -1591,29 +1615,26 @@ const speakText = (text: string) => {
       }
 
       .icon {
-        font-size: 60px;
-      }
-
-      .text {
-        font-size: 28px;
-        font-weight: bold;
-        color: white;
+        font-size: clamp(24px, 3.6vw, 38px);
+        display: grid;
+        width: 1em;
+        height: 1em;
+        place-items: center;
+        line-height: 1;
       }
     }
 
     .play-sound-btn {
-      width: 200px;
-      height: 200px;
+      width: clamp(54px, 7vw, 78px);
+      height: clamp(54px, 7vw, 78px);
+      min-width: clamp(54px, 7vw, 78px);
       border-radius: 50%;
       background: linear-gradient(135deg, #5DADE2, #85C1E9);
       border: none;
       cursor: pointer;
-      margin: 0 auto 40px;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 16px;
       box-shadow: 0 8px 24px rgba(93, 173, 226, 0.4);
       transition: all 0.3s;
 
@@ -1623,23 +1644,19 @@ const speakText = (text: string) => {
       }
 
       .icon {
-        margin-left: 8px;
-        font-size: 86px;
+        margin-left: 4px;
+        font-size: clamp(24px, 3.6vw, 38px);
+        display: grid;
+        width: 1em;
+        height: 1em;
+        place-items: center;
         line-height: 1;
-      }
-
-      .text {
-        font-size: 24px;
-        font-weight: bold;
-        color: white;
       }
     }
 
     .question {
-      font-size: 48px;
-      font-weight: bold;
-      margin-bottom: 40px;
-      color: #2C3E50;
+      display: inline-flex;
+      align-items: center;
     }
 
     .options-grid {
@@ -2765,35 +2782,33 @@ const speakText = (text: string) => {
     .question-area,
     .sound-game {
       .voice-question-btn {
-        width: min(420px, 86vw);
-        height: clamp(82px, 13vh, 110px);
-        margin-bottom: 18px;
+        width: clamp(48px, 6.5vw, 68px);
+        height: clamp(48px, 6.5vw, 68px);
+        min-width: clamp(48px, 6.5vw, 68px);
+        margin: 0;
 
         .icon {
-          font-size: clamp(38px, 7vw, 56px);
-        }
-
-        .text {
-          font-size: clamp(20px, 4vw, 26px);
+          font-size: clamp(22px, 3.2vw, 34px);
         }
       }
 
       .play-sound-btn {
-        width: clamp(104px, 18vh, 150px);
-        height: clamp(104px, 18vh, 150px);
-        margin-bottom: 10px;
+        width: clamp(48px, 6.5vw, 68px);
+        height: clamp(48px, 6.5vw, 68px);
+        min-width: clamp(48px, 6.5vw, 68px);
+        margin: 0;
 
         .icon {
-          font-size: clamp(40px, 8vw, 62px);
-        }
-
-        .text {
-          font-size: clamp(17px, 3vw, 22px);
+          font-size: clamp(22px, 3.2vw, 34px);
         }
       }
 
+      .prompt-bar {
+        margin-bottom: 14px;
+      }
+
+      .prompt-text,
       .question {
-        margin-bottom: 16px;
         font-size: clamp(28px, 5vw, 42px);
         line-height: 1.2;
       }
@@ -3905,7 +3920,7 @@ const speakText = (text: string) => {
     .sound-game {
       min-height: 0;
       display: grid;
-      grid-template-columns: minmax(160px, 0.78fr) minmax(0, 1.22fr);
+      grid-template-columns: 1fr;
       grid-template-rows: auto minmax(0, 1fr);
       align-items: center;
       gap: 6px 10px;
@@ -3913,31 +3928,32 @@ const speakText = (text: string) => {
 
       .voice-question-btn,
       .play-sound-btn {
-        grid-row: 1 / span 2;
-        width: min(148px, 24vw);
-        height: min(96px, 27dvh);
-        margin: 0 auto;
-        border-radius: 24px;
+        width: clamp(34px, 6dvh, 46px);
+        height: clamp(34px, 6dvh, 46px);
+        min-width: clamp(34px, 6dvh, 46px);
+        border-radius: 50%;
         gap: 5px;
 
         .icon {
-          font-size: clamp(28px, 6vw, 42px);
-        }
-
-        .text {
-          font-size: clamp(13px, 2.5vw, 17px);
-          line-height: 1.15;
+          font-size: clamp(16px, 4dvh, 24px);
         }
       }
 
-      .play-sound-btn {
-        border-radius: 50%;
+      .prompt-bar {
+        max-width: min(760px, calc(100vw - 112px));
+        margin-bottom: 2px;
+        padding: 4px 6px 4px 12px;
+        gap: 7px;
+      }
+
+      .prompt-text,
+      .question {
+        font-size: clamp(15px, 4.4dvh, 22px);
+        line-height: 1.05;
       }
 
       .question {
         margin: 0;
-        font-size: clamp(18px, 3.8vw, 26px);
-        line-height: 1.08;
       }
 
       .options-grid {
@@ -4292,23 +4308,30 @@ const speakText = (text: string) => {
   .sound-mode {
     .question-area,
     .sound-game {
-      grid-template-columns: minmax(190px, 0.88fr) minmax(0, 1.32fr);
-      gap: 8px 14px;
+      grid-template-columns: 1fr;
+      gap: 5px;
 
       .voice-question-btn,
       .play-sound-btn {
-        width: min(190px, 27vw);
-        height: min(116px, 32dvh);
+        width: clamp(36px, 7dvh, 48px);
+        height: clamp(36px, 7dvh, 48px);
+        min-width: clamp(36px, 7dvh, 48px);
       }
 
       .voice-question-btn .icon,
       .play-sound-btn .icon {
-        font-size: clamp(38px, 7vw, 54px);
+        font-size: clamp(18px, 4.4dvh, 26px);
       }
 
-      .voice-question-btn .text,
-      .play-sound-btn .text {
-        font-size: clamp(16px, 2.8vw, 21px);
+      .prompt-bar {
+        max-width: min(760px, calc(100vw - 112px));
+        margin-bottom: 2px;
+        padding: 4px 6px 4px 12px;
+      }
+
+      .prompt-text,
+      .question {
+        font-size: clamp(16px, 4.8dvh, 24px);
       }
 
       .options-grid {
@@ -4334,8 +4357,9 @@ const speakText = (text: string) => {
     .sound-game {
       .voice-question-btn,
       .play-sound-btn {
-        width: min(150px, 24vw);
-        height: min(96px, 30dvh);
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
       }
 
       .options-grid .option-card img {
@@ -4398,24 +4422,30 @@ const speakText = (text: string) => {
   .sound-mode {
     .question-area,
     .sound-game {
-      grid-template-columns: minmax(190px, 0.82fr) minmax(0, 1.38fr);
-      gap: 10px 16px;
+      grid-template-columns: 1fr;
+      gap: 6px;
 
       .voice-question-btn,
       .play-sound-btn {
-        grid-row: 1 / span 2;
-        width: min(200px, 27vw);
-        height: min(126px, 30dvh);
+        width: clamp(38px, 7dvh, 52px);
+        height: clamp(38px, 7dvh, 52px);
+        min-width: clamp(38px, 7dvh, 52px);
       }
 
       .voice-question-btn .icon,
       .play-sound-btn .icon {
-        font-size: clamp(42px, 7vw, 58px);
+        font-size: clamp(19px, 4.6dvh, 28px);
       }
 
-      .voice-question-btn .text,
-      .play-sound-btn .text {
-        font-size: clamp(17px, 2.8vw, 22px);
+      .prompt-bar {
+        max-width: min(840px, calc(100vw - 112px));
+        margin-bottom: 2px;
+        padding: 4px 7px 4px 14px;
+      }
+
+      .prompt-text,
+      .question {
+        font-size: clamp(17px, 4.8dvh, 26px);
       }
 
       .options-grid {

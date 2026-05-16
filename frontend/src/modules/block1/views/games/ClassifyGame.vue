@@ -1262,6 +1262,190 @@ const shuffle = <T,>(items: T[]) => {
   }
 }
 
+@media (orientation: landscape) and (max-height: 480px) {
+  .classify-game {
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+    gap: 6px;
+    padding: max(4px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+  }
+
+  .game-topbar {
+    min-height: 42px;
+    padding: 4px 8px;
+    border-width: 2px;
+    border-radius: 18px;
+    gap: 8px;
+  }
+
+  .icon-button {
+    width: 34px;
+    height: 34px;
+    font-size: 18px;
+  }
+
+  .title-block {
+    .level-label {
+      font-size: 10px;
+    }
+
+    h1 {
+      font-size: clamp(17px, 3vw, 21px);
+    }
+  }
+
+  .status-pill {
+    min-height: 34px;
+    padding: 4px 9px;
+    font-size: 13px;
+  }
+
+  .reset-button {
+    display: none;
+  }
+
+  .classify-stage {
+    min-height: 0;
+  }
+
+  .play-field {
+    height: calc(100dvh - 64px);
+    min-height: 0;
+    border-radius: 18px;
+  }
+
+  .drop-scene {
+    width: calc(24.5% - 8px);
+    min-width: 0;
+    height: calc(50% - 8px);
+    min-height: 0;
+  }
+
+  .scene-position-a {
+    top: 2px;
+    left: 2px;
+  }
+
+  .scene-position-b {
+    top: 2px;
+    right: auto;
+    left: calc(24.5% + 4px);
+  }
+
+  .scene-position-c {
+    top: calc(50% + 2px);
+    bottom: auto;
+    left: 2px;
+  }
+
+  .scene-position-d {
+    top: calc(50% + 2px);
+    right: auto;
+    bottom: auto;
+    left: calc(24.5% + 4px);
+  }
+
+  .scene-copy {
+    bottom: 0;
+    min-width: 66px;
+    padding: 3px 8px;
+    border-width: 1px;
+
+    h2 {
+      font-size: 14px;
+    }
+  }
+
+  .placed-items {
+    right: 8px;
+    left: 8px;
+    gap: 2px;
+  }
+
+  .placed-item {
+    width: 34px;
+    height: 34px;
+  }
+
+  .center-nest {
+    top: 2px;
+    right: 2px;
+    left: auto;
+    width: calc(51% - 6px);
+    min-width: 0;
+    height: calc(100% - 4px);
+    min-height: 0;
+    padding: 8px;
+    gap: 6px;
+    border-width: 2px;
+    border-radius: 18px;
+    transform: none;
+
+    > p {
+      font-size: clamp(15px, 2.8vw, 18px);
+      line-height: 1.1;
+    }
+  }
+
+  .item-tray {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    align-content: center;
+  }
+
+  .drag-card {
+    aspect-ratio: 1 / 0.94;
+    min-height: 0;
+    padding: 5px 4px 4px;
+    border-radius: 14px;
+    font-size: 10px;
+
+    img {
+      width: min(44px, 78%);
+      height: min(44px, 78%);
+    }
+  }
+
+  .drag-ghost {
+    width: 76px;
+    height: 82px;
+    border-radius: 18px;
+    font-size: 11px;
+
+    img {
+      width: 52px;
+      height: 52px;
+    }
+  }
+
+  .feedback-bubble {
+    top: 48px;
+    padding: 6px 14px;
+    font-size: 15px;
+  }
+
+  .complete-card {
+    width: min(360px, 92vw);
+    padding: 16px 18px;
+    gap: 8px;
+
+    h2 {
+      font-size: 30px;
+    }
+  }
+
+  .earned-stars {
+    font-size: 26px;
+  }
+
+  .primary-action,
+  .secondary-action {
+    min-height: 42px;
+    font-size: 15px;
+  }
+}
+
 @keyframes scene-pop {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.045); }

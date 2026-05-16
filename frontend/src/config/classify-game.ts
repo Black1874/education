@@ -32,7 +32,7 @@ export const CLASSIFY_TARGETS: ClassifyTarget[] = [
     shortTitle: '果盘',
     hint: '水果放这里',
     sceneClass: 'fruit-scene',
-    sceneImageUrl: '/images/scene/fruit_scene.png'
+    sceneImageUrl: '/images/scene/fruit_scene.webp'
   },
   {
     id: 'vegetable',
@@ -40,7 +40,7 @@ export const CLASSIFY_TARGETS: ClassifyTarget[] = [
     shortTitle: '菜篮子',
     hint: '蔬菜放这里',
     sceneClass: 'vegetable-scene',
-    sceneImageUrl: '/images/scene/vagetable_scene.png'
+    sceneImageUrl: '/images/scene/vagetable_scene.webp'
   },
   {
     id: 'animal',
@@ -48,7 +48,7 @@ export const CLASSIFY_TARGETS: ClassifyTarget[] = [
     shortTitle: '动物园',
     hint: '小动物回这里',
     sceneClass: 'animal-scene',
-    sceneImageUrl: '/images/scene/zoo_scene.png'
+    sceneImageUrl: '/images/scene/zoo_scene.webp'
   },
   {
     id: 'vehicle',
@@ -56,7 +56,7 @@ export const CLASSIFY_TARGETS: ClassifyTarget[] = [
     shortTitle: '停车场',
     hint: '车车停这里',
     sceneClass: 'vehicle-scene',
-    sceneImageUrl: '/images/scene/parking_scene.png'
+    sceneImageUrl: '/images/scene/parking_scene.webp'
   }
 ]
 

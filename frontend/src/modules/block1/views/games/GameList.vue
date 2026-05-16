@@ -64,7 +64,7 @@ const games = ref([
     emoji: '📦',
     description: '把物品分类整理',
     color: 'linear-gradient(135deg, #FFE4CC 0%, #FFA07A 100%)',
-    totalLevels: 15
+    totalLevels: 5
   },
   {
     id: 'puzzle',

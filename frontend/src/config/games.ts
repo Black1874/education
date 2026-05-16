@@ -85,7 +85,7 @@ export const GAME_TYPES = {
     nameEn: 'Classification',
     icon: '/icons/classify.png',
     color: '#FFA07A',
-    totalLevels: 15,
+    totalLevels: 5,
     description: '把物品分类整理'
   },
   PUZZLE: {

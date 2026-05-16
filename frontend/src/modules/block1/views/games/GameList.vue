@@ -51,14 +51,6 @@ onMounted(() => {
 
 const games = ref([
   {
-    id: 'memory',
-    name: '记忆游戏',
-    emoji: '🧠',
-    description: '考验你的记忆力',
-    color: 'linear-gradient(135deg, #FFE4E1 0%, #FF6B9D 100%)',
-    totalLevels: 15
-  },
-  {
     id: 'classify',
     name: '分类游戏',
     emoji: '📦',
@@ -72,8 +64,16 @@ const games = ref([
     emoji: '🧩',
     description: '拼出完整的图案',
     color: 'linear-gradient(135deg, #E0F8F0 0%, #98D8C8 100%)',
-    totalLevels: 5
+    totalLevels: 10
   },
+    {
+      id: 'memory',
+      name: '记忆游戏',
+      emoji: '🧠',
+      description: '考验你的记忆力',
+      color: 'linear-gradient(135deg, #FFE4E1 0%, #FF6B9D 100%)',
+      totalLevels: 15
+    },
   {
     id: 'difference',
     name: '找不同',

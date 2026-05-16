@@ -70,15 +70,6 @@ export const LEARNING_CATEGORIES = {
 
 // 游戏类型定义
 export const GAME_TYPES = {
-  MEMORY: {
-    id: 'memory',
-    name: '记忆游戏',
-    nameEn: 'Memory Game',
-    icon: '/icons/memory.png',
-    color: '#FF6B9D',
-    totalLevels: 15,
-    description: '考验你的记忆力'
-  },
   CLASSIFY: {
     id: 'classify',
     name: '分类游戏',
@@ -94,8 +85,17 @@ export const GAME_TYPES = {
     nameEn: 'Puzzle',
     icon: '/icons/puzzle.png',
     color: '#98D8C8',
-    totalLevels: 6,
+    totalLevels: 10,
     description: '拼出完整的图案'
+  },
+  MEMORY: {
+    id: 'memory',
+    name: '记忆游戏',
+    nameEn: 'Memory Game',
+    icon: '/icons/memory.png',
+    color: '#FF6B9D',
+    totalLevels: 15,
+    description: '考验你的记忆力'
   },
   DIFFERENCE: {
     id: 'difference',

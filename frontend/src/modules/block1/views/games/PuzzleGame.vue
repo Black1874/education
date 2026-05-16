@@ -164,6 +164,7 @@ const rootStyle = computed(() => {
   const pieceRadius = size === 2 ? 18 : size === 3 ? 14 : 10
   const ghostSize = size === 2 ? 116 : size === 3 ? 96 : 78
   const trayColumns = size === 2 ? 2 : size === 3 ? 3 : 4
+  const landscapeTrayColumns = size === 2 ? 4 : size === 3 ? 5 : 8
 
   return {
     '--theme-color': level.value.themeColor,
@@ -171,7 +172,8 @@ const rootStyle = computed(() => {
     '--slot-radius': `${slotRadius}px`,
     '--piece-radius': `${pieceRadius}px`,
     '--ghost-size': `${ghostSize}px`,
-    '--tray-columns': String(trayColumns)
+    '--tray-columns': String(trayColumns),
+    '--landscape-tray-columns': String(landscapeTrayColumns)
   }
 })
 
@@ -869,10 +871,71 @@ const shuffle = <T,>(items: T[]) => {
   }
 }
 
+@media (orientation: portrait) and (min-width: 821px) and (max-width: 1180px) {
+  .puzzle-game {
+    overflow: auto;
+    touch-action: pan-y;
+  }
+
+  .game-topbar {
+    position: sticky;
+    top: max(10px, env(safe-area-inset-top));
+  }
+
+  .puzzle-stage {
+    grid-template-columns: 1fr;
+    align-content: start;
+    justify-items: center;
+    gap: clamp(14px, 2vw, 22px);
+  }
+
+  .board-panel,
+  .piece-panel {
+    width: min(900px, 100%);
+    border-radius: 30px;
+  }
+
+  .board-panel {
+    padding: clamp(14px, 2vw, 20px);
+  }
+
+  .puzzle-board {
+    width: min(620px, 76vw, 48dvh);
+    gap: 7px;
+    padding: 9px;
+    border-radius: 26px;
+  }
+
+  .piece-panel {
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 12px;
+    padding: clamp(14px, 2vw, 20px);
+
+    > p {
+      font-size: clamp(22px, 2.8vw, 28px);
+    }
+  }
+
+  .piece-tray {
+    grid-template-columns: repeat(var(--landscape-tray-columns), minmax(0, 1fr));
+    gap: 10px;
+    width: min(820px, 100%);
+    justify-self: center;
+  }
+
+  .puzzle-piece {
+    padding: 7px;
+    border-radius: 20px;
+  }
+}
+
 @media (max-width: 430px) {
   .puzzle-game {
+    height: 100dvh;
+    min-height: 0;
     gap: 8px;
     padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+    overflow: hidden;
   }
 
   .game-topbar {
@@ -918,7 +981,9 @@ const shuffle = <T,>(items: T[]) => {
   }
 
   .puzzle-board {
-    width: min(100%, 318px);
+    width: min(100%, 292px);
+    gap: 5px;
+    padding: 7px;
   }
 
   .puzzle-slot {
@@ -927,6 +992,34 @@ const shuffle = <T,>(items: T[]) => {
 
   .puzzle-piece span {
     border-radius: var(--piece-radius);
+  }
+
+  .puzzle-stage {
+    min-height: 0;
+    align-content: start;
+    gap: 10px;
+    overflow: hidden;
+  }
+
+  .board-panel {
+    gap: 6px;
+    padding: 8px;
+  }
+
+  .piece-panel {
+    min-height: 0;
+    gap: 8px;
+    padding: 10px;
+
+    > p {
+      font-size: 18px;
+      line-height: 1.15;
+    }
+  }
+
+  .piece-tray {
+    width: min(100%, 292px);
+    justify-self: center;
   }
 
   .feedback-bubble {
@@ -983,10 +1076,11 @@ const shuffle = <T,>(items: T[]) => {
   }
 
   .puzzle-stage {
-    grid-template-columns: minmax(250px, 38%) minmax(360px, 58%);
+    grid-template-columns: minmax(230px, 34%) minmax(0, 1fr);
     gap: 10px;
     height: calc(100dvh - 64px);
     align-items: stretch;
+    overflow: hidden;
   }
 
   .board-panel,
@@ -1015,7 +1109,9 @@ const shuffle = <T,>(items: T[]) => {
   }
 
   .piece-panel {
+    grid-template-rows: auto minmax(0, 1fr);
     gap: 6px;
+    overflow: hidden;
 
     > p {
       font-size: clamp(15px, 2.8vw, 18px);
@@ -1024,7 +1120,10 @@ const shuffle = <T,>(items: T[]) => {
   }
 
   .piece-tray {
+    grid-template-columns: repeat(var(--landscape-tray-columns), minmax(0, 1fr));
     gap: 6px;
+    min-height: 0;
+    align-content: center;
   }
 
   .puzzle-piece {

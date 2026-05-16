@@ -59,7 +59,7 @@ export const PUZZLE_LEVELS: PuzzleLevel[] = [
     imageUrl: '/images/puzzle/parking_scene.webp',
     imageName: '停车小镇',
     themeColor: '#9fc9ff',
-    gridSize: 3
+    gridSize: 2
   },
   {
     level: 6,
@@ -68,7 +68,7 @@ export const PUZZLE_LEVELS: PuzzleLevel[] = [
     imageUrl: '/images/puzzle/vagetable_scene.webp',
     imageName: '蔬菜花园',
     themeColor: '#a7d982',
-    gridSize: 3
+    gridSize: 2
   },
   {
     level: 7,
@@ -77,7 +77,7 @@ export const PUZZLE_LEVELS: PuzzleLevel[] = [
     imageUrl: '/images/puzzle/park.webp',
     imageName: '公园大挑战',
     themeColor: '#ffd76b',
-    gridSize: 3
+    gridSize: 2
   },
   {
     level: 8,

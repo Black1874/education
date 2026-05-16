@@ -128,6 +128,10 @@ interface DragState {
   pointerId: number
   x: number
   y: number
+  offsetX: number
+  offsetY: number
+  width: number
+  height: number
 }
 
 const router = useRouter()
@@ -162,7 +166,6 @@ const rootStyle = computed(() => {
   const size = gridSize.value
   const slotRadius = size === 2 ? 22 : size === 3 ? 17 : 13
   const pieceRadius = size === 2 ? 18 : size === 3 ? 14 : 10
-  const ghostSize = size === 2 ? 116 : size === 3 ? 96 : 78
   const trayColumns = size === 2 ? 2 : size === 3 ? 3 : 4
   const landscapeTrayColumns = size === 2 ? 4 : size === 3 ? 5 : 8
 
@@ -171,7 +174,6 @@ const rootStyle = computed(() => {
     '--grid-size': String(size),
     '--slot-radius': `${slotRadius}px`,
     '--piece-radius': `${pieceRadius}px`,
-    '--ghost-size': `${ghostSize}px`,
     '--tray-columns': String(trayColumns),
     '--landscape-tray-columns': String(landscapeTrayColumns)
   }
@@ -181,7 +183,9 @@ const ghostStyle = computed(() => {
   if (!dragState.value) return {}
 
   return {
-    transform: `translate3d(${dragState.value.x}px, ${dragState.value.y}px, 0)`
+    height: `${dragState.value.height}px`,
+    transform: `translate3d(${dragState.value.x - dragState.value.offsetX}px, ${dragState.value.y - dragState.value.offsetY}px, 0)`,
+    width: `${dragState.value.width}px`
   }
 })
 
@@ -249,12 +253,19 @@ const startDrag = (event: PointerEvent, piece: PuzzlePiece) => {
   if (completed.value) return
 
   event.preventDefault()
+  const target = event.currentTarget as HTMLElement
+  const targetRect = target.getBoundingClientRect()
+
   audioManager.playClick()
   dragState.value = {
     piece,
     pointerId: event.pointerId,
     x: event.clientX,
-    y: event.clientY
+    y: event.clientY,
+    offsetX: event.clientX - targetRect.left,
+    offsetY: event.clientY - targetRect.top,
+    width: targetRect.width,
+    height: targetRect.height
   }
 
   window.addEventListener('pointermove', handlePointerMove, { passive: false })
@@ -654,8 +665,6 @@ const shuffle = <T,>(items: T[]) => {
   left: 0;
   top: 0;
   z-index: 40;
-  width: var(--ghost-size);
-  height: var(--ghost-size);
   display: grid;
   place-items: center;
   padding: 8px;
@@ -663,7 +672,7 @@ const shuffle = <T,>(items: T[]) => {
   background: rgba(255, 255, 255, 0.94);
   box-shadow: 0 20px 36px rgba(74, 95, 122, 0.24);
   pointer-events: none;
-  translate: -50% -58%;
+  will-change: transform;
 
   span {
     width: 100%;

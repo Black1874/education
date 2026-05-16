@@ -4,11 +4,13 @@ class AudioManager {
   private effectVolume: number = 0.7
   private isMuted: boolean = false
   private backgroundMusicEnabled: boolean = false
-  private backgroundAudioContext: AudioContext | null = null
+  private audioContext: AudioContext | null = null
   private backgroundGain: GainNode | null = null
   private backgroundTimers: number[] = []
   private backgroundOscillators: OscillatorNode[] = []
   private backgroundPlaying: boolean = false
+  private backgroundStarting: boolean = false
+  private backgroundLoopId: number = 0
   private backgroundSongIndex: number = 0
 
   constructor() {
@@ -24,7 +26,29 @@ class AudioManager {
   }
 
   private getAudioContext() {
-    return new (window.AudioContext || (window as any).webkitAudioContext)()
+    if (this.audioContext && this.audioContext.state !== 'closed') {
+      return this.audioContext
+    }
+
+    this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+    return this.audioContext
+  }
+
+  private runWhenAudioReady(callback: (context: AudioContext) => void) {
+    const context = this.getAudioContext()
+
+    if (context.state === 'running') {
+      callback(context)
+      return
+    }
+
+    context.resume()
+      .then(() => {
+        if (context.state === 'running') {
+          callback(context)
+        }
+      })
+      .catch(err => console.warn('Audio resume failed:', err))
   }
 
   preload(key: string, url: string) {
@@ -90,8 +114,8 @@ class AudioManager {
       }
     })
 
-    if (this.backgroundGain && this.backgroundAudioContext) {
-      this.backgroundGain.gain.setTargetAtTime(this.musicVolume * 0.16, this.backgroundAudioContext.currentTime, 0.08)
+    if (this.backgroundGain && this.audioContext && this.audioContext.state !== 'closed') {
+      this.backgroundGain.gain.setTargetAtTime(this.musicVolume * 0.16, this.audioContext.currentTime, 0.08)
     }
   }
 
@@ -151,17 +175,9 @@ class AudioManager {
   }
 
   playBackgroundMusic() {
-    if (!this.backgroundMusicEnabled || this.isMuted || this.musicVolume <= 0 || this.backgroundPlaying) return
+    if (!this.backgroundMusicEnabled || this.isMuted || this.musicVolume <= 0 || this.backgroundPlaying || this.backgroundStarting) return
 
-    const context = this.backgroundAudioContext || this.getAudioContext()
-    if (context.state === 'suspended') {
-      context.resume().catch(err => console.warn('Background music resume failed:', err))
-    }
-    this.backgroundAudioContext = context
-    this.backgroundGain = this.backgroundGain || context.createGain()
-    this.backgroundGain.connect(context.destination)
-    this.backgroundGain.gain.setValueAtTime(this.musicVolume * 0.16, context.currentTime)
-    this.backgroundPlaying = true
+    const context = this.getAudioContext()
 
     const songs = [
       {
@@ -247,8 +263,23 @@ class AudioManager {
       }
     ]
 
-    const playLoop = () => {
-      if (!this.backgroundPlaying || !this.backgroundAudioContext || !this.backgroundGain) return
+    const startLoop = () => {
+      if (!this.backgroundMusicEnabled || this.isMuted || this.musicVolume <= 0 || this.backgroundPlaying) return
+
+      const activeContext = this.getAudioContext()
+      if (activeContext.state !== 'running') return
+
+      const loopId = ++this.backgroundLoopId
+      this.backgroundGain = activeContext.createGain()
+      this.backgroundGain.connect(activeContext.destination)
+      this.backgroundGain.gain.setValueAtTime(this.musicVolume * 0.16, activeContext.currentTime)
+      this.backgroundPlaying = true
+
+      playLoop(loopId)
+    }
+
+    const playLoop = (loopId: number) => {
+      if (!this.backgroundPlaying || loopId !== this.backgroundLoopId || !this.backgroundGain || context.state !== 'running') return
 
       const song = songs[this.backgroundSongIndex % songs.length]
       this.backgroundSongIndex++
@@ -276,15 +307,31 @@ class AudioManager {
         offset += duration
       })
 
-      const timer = window.setTimeout(playLoop, (offset + 1.2) * 1000)
+      const timer = window.setTimeout(() => playLoop(loopId), (offset + 1.2) * 1000)
       this.backgroundTimers.push(timer)
     }
 
-    playLoop()
+    if (context.state === 'running') {
+      startLoop()
+      return
+    }
+
+    this.backgroundStarting = true
+    context.resume()
+      .then(() => {
+        this.backgroundStarting = false
+        startLoop()
+      })
+      .catch((err) => {
+        this.backgroundStarting = false
+        console.warn('Background music resume failed:', err)
+      })
   }
 
   stopBackgroundMusic() {
+    this.backgroundLoopId++
     this.backgroundPlaying = false
+    this.backgroundStarting = false
     this.backgroundTimers.forEach(timer => window.clearTimeout(timer))
     this.backgroundTimers = []
     this.backgroundOscillators.forEach((oscillator) => {
@@ -296,9 +343,13 @@ class AudioManager {
       oscillator.disconnect()
     })
     this.backgroundOscillators = []
-    if (this.backgroundGain && this.backgroundAudioContext) {
-      this.backgroundGain.gain.setTargetAtTime(0.0001, this.backgroundAudioContext.currentTime, 0.05)
-      this.backgroundGain.disconnect()
+    if (this.backgroundGain && this.audioContext && this.audioContext.state !== 'closed') {
+      try {
+        this.backgroundGain.gain.setTargetAtTime(0.0001, this.audioContext.currentTime, 0.05)
+        this.backgroundGain.disconnect()
+      } catch {
+        // The gain may already be disconnected.
+      }
     }
     this.backgroundGain = null
   }
@@ -306,72 +357,92 @@ class AudioManager {
   playClick() {
     if (this.isMuted || this.effectVolume <= 0) return
     this.playBackgroundMusic()
-    const audioContext = this.getAudioContext()
-    const oscillator = audioContext.createOscillator()
-    const gainNode = audioContext.createGain()
+    this.runWhenAudioReady((audioContext) => {
+      const oscillator = audioContext.createOscillator()
+      const gainNode = audioContext.createGain()
 
-    oscillator.connect(gainNode)
-    gainNode.connect(audioContext.destination)
-    oscillator.frequency.value = 800
-    oscillator.type = 'sine'
-    gainNode.gain.setValueAtTime(this.effectVolume * 0.3, audioContext.currentTime)
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1)
-    oscillator.start(audioContext.currentTime)
-    oscillator.stop(audioContext.currentTime + 0.1)
+      oscillator.connect(gainNode)
+      gainNode.connect(audioContext.destination)
+      oscillator.frequency.value = 800
+      oscillator.type = 'sine'
+      gainNode.gain.setValueAtTime(this.effectVolume * 0.3, audioContext.currentTime)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1)
+      oscillator.start(audioContext.currentTime)
+      oscillator.stop(audioContext.currentTime + 0.1)
+      oscillator.onended = () => {
+        oscillator.disconnect()
+        gainNode.disconnect()
+      }
+    })
   }
 
   playSuccess() {
     if (this.isMuted || this.effectVolume <= 0) return
     this.playBackgroundMusic()
-    const audioContext = this.getAudioContext()
-    const oscillator = audioContext.createOscillator()
-    const gainNode = audioContext.createGain()
+    this.runWhenAudioReady((audioContext) => {
+      const oscillator = audioContext.createOscillator()
+      const gainNode = audioContext.createGain()
 
-    oscillator.connect(gainNode)
-    gainNode.connect(audioContext.destination)
-    oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime)
-    oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1)
-    oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2)
-    oscillator.type = 'sine'
-    gainNode.gain.setValueAtTime(this.effectVolume * 0.3, audioContext.currentTime)
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4)
-    oscillator.start(audioContext.currentTime)
-    oscillator.stop(audioContext.currentTime + 0.4)
+      oscillator.connect(gainNode)
+      gainNode.connect(audioContext.destination)
+      oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime)
+      oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1)
+      oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2)
+      oscillator.type = 'sine'
+      gainNode.gain.setValueAtTime(this.effectVolume * 0.3, audioContext.currentTime)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4)
+      oscillator.start(audioContext.currentTime)
+      oscillator.stop(audioContext.currentTime + 0.4)
+      oscillator.onended = () => {
+        oscillator.disconnect()
+        gainNode.disconnect()
+      }
+    })
   }
 
   playPuzzleMatch() {
     if (this.isMuted || this.effectVolume <= 0) return
     this.playBackgroundMusic()
-    const audioContext = this.getAudioContext()
-    const oscillator = audioContext.createOscillator()
-    const gainNode = audioContext.createGain()
+    this.runWhenAudioReady((audioContext) => {
+      const oscillator = audioContext.createOscillator()
+      const gainNode = audioContext.createGain()
 
-    oscillator.connect(gainNode)
-    gainNode.connect(audioContext.destination)
-    oscillator.frequency.setValueAtTime(660, audioContext.currentTime)
-    oscillator.frequency.exponentialRampToValueAtTime(990, audioContext.currentTime + 0.08)
-    oscillator.type = 'triangle'
-    gainNode.gain.setValueAtTime(this.effectVolume * 0.22, audioContext.currentTime)
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.16)
-    oscillator.start(audioContext.currentTime)
-    oscillator.stop(audioContext.currentTime + 0.16)
+      oscillator.connect(gainNode)
+      gainNode.connect(audioContext.destination)
+      oscillator.frequency.setValueAtTime(660, audioContext.currentTime)
+      oscillator.frequency.exponentialRampToValueAtTime(990, audioContext.currentTime + 0.08)
+      oscillator.type = 'triangle'
+      gainNode.gain.setValueAtTime(this.effectVolume * 0.22, audioContext.currentTime)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.16)
+      oscillator.start(audioContext.currentTime)
+      oscillator.stop(audioContext.currentTime + 0.16)
+      oscillator.onended = () => {
+        oscillator.disconnect()
+        gainNode.disconnect()
+      }
+    })
   }
 
   playError() {
     if (this.isMuted || this.effectVolume <= 0) return
     this.playBackgroundMusic()
-    const audioContext = this.getAudioContext()
-    const oscillator = audioContext.createOscillator()
-    const gainNode = audioContext.createGain()
+    this.runWhenAudioReady((audioContext) => {
+      const oscillator = audioContext.createOscillator()
+      const gainNode = audioContext.createGain()
 
-    oscillator.connect(gainNode)
-    gainNode.connect(audioContext.destination)
-    oscillator.frequency.value = 200
-    oscillator.type = 'sawtooth'
-    gainNode.gain.setValueAtTime(this.effectVolume * 0.2, audioContext.currentTime)
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2)
-    oscillator.start(audioContext.currentTime)
-    oscillator.stop(audioContext.currentTime + 0.2)
+      oscillator.connect(gainNode)
+      gainNode.connect(audioContext.destination)
+      oscillator.frequency.value = 200
+      oscillator.type = 'sawtooth'
+      gainNode.gain.setValueAtTime(this.effectVolume * 0.2, audioContext.currentTime)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2)
+      oscillator.start(audioContext.currentTime)
+      oscillator.stop(audioContext.currentTime + 0.2)
+      oscillator.onended = () => {
+        oscillator.disconnect()
+        gainNode.disconnect()
+      }
+    })
   }
 }
 

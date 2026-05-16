@@ -990,7 +990,7 @@ const shuffle = <T,>(items: T[]) => {
   }
 
   .puzzle-board {
-    width: min(100%, 292px);
+    width: min(100%, clamp(220px, calc((100dvh - 236px) / 2), 292px));
     gap: 5px;
     padding: 7px;
   }
@@ -1027,7 +1027,7 @@ const shuffle = <T,>(items: T[]) => {
   }
 
   .piece-tray {
-    width: min(100%, 292px);
+    width: min(100%, clamp(220px, calc((100dvh - 236px) / 2), 292px));
     justify-self: center;
   }
 
@@ -1038,6 +1038,73 @@ const shuffle = <T,>(items: T[]) => {
 
   .complete-actions {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 430px) and (max-height: 760px) {
+  .puzzle-game {
+    gap: 6px;
+    padding: max(6px, env(safe-area-inset-top)) max(7px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(7px, env(safe-area-inset-left));
+  }
+
+  .game-topbar {
+    min-height: 50px;
+    gap: 6px;
+    padding: 5px 7px;
+    border-radius: 18px;
+  }
+
+  .icon-button {
+    width: 38px;
+    height: 38px;
+    font-size: 20px;
+  }
+
+  .title-block {
+    p {
+      font-size: 10px;
+    }
+
+    h1 {
+      font-size: 19px;
+    }
+  }
+
+  .status-pill {
+    min-height: 38px;
+    padding: 5px 8px;
+    font-size: 14px;
+  }
+
+  .board-title {
+    display: none;
+  }
+
+  .puzzle-stage {
+    gap: 8px;
+  }
+
+  .board-panel {
+    padding: 6px;
+  }
+
+  .puzzle-board {
+    width: min(100%, clamp(206px, calc((100dvh - 188px) / 2), 262px));
+    padding: 6px;
+  }
+
+  .piece-panel {
+    gap: 6px;
+    padding: 8px;
+
+    > p {
+      font-size: 16px;
+    }
+  }
+
+  .piece-tray {
+    width: min(100%, clamp(206px, calc((100dvh - 188px) / 2), 262px));
+    gap: 6px;
   }
 }
 

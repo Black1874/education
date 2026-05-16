@@ -29,6 +29,11 @@ const router = createRouter({
       component: () => import('@/modules/block1/views/games/GameDetail.vue')
     },
     {
+      path: '/:type(songs|animations)',
+      name: 'media-list',
+      component: () => import('@/views/MediaList.vue')
+    },
+    {
       path: '/login',
       name: 'login',
       component: () => import('@/views/Login.vue')

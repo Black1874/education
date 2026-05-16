@@ -731,7 +731,10 @@ const toggleAutoPlay = () => {
 }
 
 const startAutoPlay = () => {
-  stopAutoPlay()
+  if (autoPlayTimer) {
+    clearInterval(autoPlayTimer)
+    autoPlayTimer = null
+  }
   autoPlayTimer = setInterval(() => {
     nextContent()
   }, 3000) // 每3秒切换
@@ -1882,10 +1885,10 @@ const speakText = (text: string) => {
         border-radius: 44px;
         background: radial-gradient(circle, #FFFFFF 0%, #FFF8E7 72%);
         box-shadow: inset 0 -8px 0 rgba(255, 210, 150, 0.25), 0 14px 32px rgba(93, 173, 226, 0.12);
-        animation: babyFloat 3.2s ease-in-out infinite;
 
         img {
           filter: drop-shadow(0 12px 16px rgba(76, 88, 110, 0.12));
+          animation: babyFloat 3.2s ease-in-out infinite;
         }
 
         .tap-hint {
@@ -4489,6 +4492,244 @@ const speakText = (text: string) => {
   .explore-mode .content-stage .current-content .content-image .tap-hint {
     bottom: 14px !important;
     font-size: 16px !important;
+  }
+}
+
+// 快速识别/听声辨物：内容选项优先，提示与播放按钮保持辅助尺寸
+.quick-mode,
+.sound-mode {
+  min-height: min(720px, calc(100dvh - 132px));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  .game-info {
+    gap: 10px;
+    margin-bottom: 12px;
+    font-size: clamp(14px, 1.8vw, 19px);
+
+    > div {
+      min-height: 34px;
+      padding: 6px 14px;
+    }
+  }
+
+  .question-area,
+  .sound-game {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 14px;
+    min-height: 0;
+
+    .prompt-bar {
+      width: fit-content;
+      max-width: min(760px, calc(100vw - 40px));
+      min-height: 38px;
+      margin: 0 auto;
+      padding: 4px 6px 4px 14px;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .prompt-text,
+    .question {
+      min-width: 0;
+      overflow: hidden;
+      color: #4A5F7A;
+      font-size: clamp(15px, 1.8vw, 22px);
+      line-height: 1.2;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .voice-question-btn,
+    .play-sound-btn {
+      width: clamp(32px, 3.4vw, 40px);
+      height: clamp(32px, 3.4vw, 40px);
+      min-width: clamp(32px, 3.4vw, 40px);
+      border-width: 3px;
+      box-shadow: inset 0 -4px 0 rgba(69, 152, 206, 0.16), 0 8px 16px rgba(93, 173, 226, 0.18);
+
+      .icon {
+        margin: 0;
+        font-size: clamp(14px, 1.8vw, 19px);
+      }
+    }
+
+    .options-grid {
+      width: min(1040px, 100%);
+      max-width: none;
+      margin: 0 auto;
+      gap: clamp(14px, 2vw, 24px);
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+
+      .option-card {
+        min-height: clamp(180px, 24dvh, 250px);
+        padding: clamp(14px, 2vw, 22px);
+        display: grid;
+        place-items: center;
+
+        img {
+          width: 100%;
+          max-height: clamp(138px, 20dvh, 210px);
+          margin: 0;
+        }
+      }
+    }
+  }
+}
+
+@media (min-width: 700px) and (max-width: 1366px) and (orientation: portrait) {
+  .quick-mode,
+  .sound-mode {
+    min-height: calc(100dvh - 150px);
+
+    .question-area,
+    .sound-game {
+      gap: 16px;
+
+      .options-grid {
+        width: min(900px, 94vw);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+
+        .option-card {
+          min-height: clamp(210px, 24dvh, 300px);
+
+          img {
+            max-height: clamp(170px, 20dvh, 245px);
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) and (orientation: portrait) {
+  .quick-mode,
+  .sound-mode {
+    min-height: calc(100dvh - 132px);
+
+    .game-info {
+      gap: 6px;
+      margin-bottom: 8px;
+      font-size: 12px;
+
+      > div {
+        min-height: 27px;
+        padding: 3px 8px;
+      }
+    }
+
+    .question-area,
+    .sound-game {
+      gap: 8px;
+
+      .prompt-bar {
+        max-width: calc(100vw - 24px);
+        min-height: 32px;
+        padding: 2px 4px 2px 10px;
+        gap: 5px;
+      }
+
+      .prompt-text,
+      .question {
+        font-size: clamp(13px, 3.4vw, 15px);
+        line-height: 1.2;
+      }
+
+      .voice-question-btn,
+      .play-sound-btn {
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+        border-width: 2px;
+
+        .icon {
+          font-size: 14px;
+        }
+      }
+
+      .options-grid {
+        width: 100%;
+        gap: 10px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+
+        .option-card {
+          min-height: clamp(122px, 18dvh, 160px);
+          padding: 9px;
+          border-width: 3px;
+          border-radius: 22px;
+
+          img {
+            max-height: clamp(96px, 15dvh, 132px);
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .quick-mode,
+  .sound-mode {
+    height: 100%;
+    min-height: 0;
+    justify-content: center;
+
+    .game-info {
+      gap: 5px;
+      margin-bottom: 5px;
+      font-size: 11px;
+
+      > div {
+        min-height: 23px;
+        padding: 2px 8px;
+      }
+    }
+
+    .question-area,
+    .sound-game {
+      gap: 6px;
+
+      .prompt-bar {
+        max-width: min(740px, calc(100vw - 112px));
+        min-height: 28px;
+        padding: 2px 4px 2px 9px;
+      }
+
+      .prompt-text,
+      .question {
+        font-size: clamp(12px, 3.1dvh, 16px);
+        line-height: 1.15;
+      }
+
+      .voice-question-btn,
+      .play-sound-btn {
+        width: clamp(26px, 4.4dvh, 34px);
+        height: clamp(26px, 4.4dvh, 34px);
+        min-width: clamp(26px, 4.4dvh, 34px);
+
+        .icon {
+          font-size: clamp(12px, 2.9dvh, 17px);
+        }
+      }
+
+      .options-grid {
+        width: 100%;
+        gap: clamp(6px, 1.2vw, 10px);
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+
+        .option-card {
+          min-height: 0;
+          padding: 7px;
+          border-radius: 18px;
+
+          img {
+            max-height: min(132px, 31dvh);
+          }
+        }
+      }
+    }
   }
 }
 

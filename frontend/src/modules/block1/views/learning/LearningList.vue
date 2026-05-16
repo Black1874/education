@@ -213,6 +213,10 @@ const goToCategory = (categoryId: string) => {
 }
 
 .category-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   background: white;
   border-radius: 24px;
   padding: 40px 24px;
@@ -342,20 +346,6 @@ const goToCategory = (categoryId: string) => {
   border: 5px solid rgba(255, 255, 255, 0.82);
   border-radius: 38px;
   box-shadow: inset 0 -10px 0 rgba(255, 255, 255, 0.28), 0 18px 38px rgba(116, 139, 170, 0.16);
-
-  &::after {
-    content: '点我开始';
-    position: absolute;
-    right: 20px;
-    bottom: 18px;
-    padding: 8px 16px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.78);
-    color: #FF8DB3;
-    font-size: 16px;
-    font-weight: bold;
-    box-shadow: 0 6px 14px rgba(255, 141, 179, 0.14);
-  }
 
   &:hover,
   &:active {
@@ -566,6 +556,57 @@ const goToCategory = (categoryId: string) => {
 
     .card-desc {
       display: none;
+    }
+  }
+}
+
+@media (min-width: 700px) and (max-width: 1024px) and (orientation: portrait) {
+  .learning-list-page {
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .header {
+    flex-shrink: 0;
+  }
+
+  .main-content {
+    flex: 1;
+    width: 100%;
+    max-width: none;
+    min-height: 0;
+    padding: 24px max(32px, env(safe-area-inset-right)) calc(28px + env(safe-area-inset-bottom)) max(32px, env(safe-area-inset-left));
+    overflow: hidden;
+  }
+
+  .category-grid {
+    height: 100%;
+    min-height: 0;
+    gap: 18px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: minmax(0, 1fr);
+  }
+
+  .category-card {
+    min-height: 0;
+    padding: 24px 18px 20px;
+
+    .card-icon {
+      margin-bottom: 8px;
+      font-size: clamp(48px, 7vw, 68px);
+    }
+
+    .card-title {
+      margin-bottom: 7px;
+      font-size: clamp(22px, 3vw, 28px);
+    }
+
+    .card-count {
+      padding: 6px 14px;
+      font-size: 14px;
     }
   }
 }

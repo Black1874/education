@@ -7,6 +7,7 @@ class AudioManager {
   private backgroundAudioContext: AudioContext | null = null
   private backgroundGain: GainNode | null = null
   private backgroundTimers: number[] = []
+  private backgroundOscillators: OscillatorNode[] = []
   private backgroundPlaying: boolean = false
   private backgroundSongIndex: number = 0
 
@@ -268,6 +269,10 @@ class AudioManager {
         noteGain.gain.exponentialRampToValueAtTime(0.0001, end)
         oscillator.start(start)
         oscillator.stop(end + 0.02)
+        this.backgroundOscillators.push(oscillator)
+        oscillator.onended = () => {
+          this.backgroundOscillators = this.backgroundOscillators.filter(item => item !== oscillator)
+        }
         offset += duration
       })
 
@@ -282,9 +287,20 @@ class AudioManager {
     this.backgroundPlaying = false
     this.backgroundTimers.forEach(timer => window.clearTimeout(timer))
     this.backgroundTimers = []
+    this.backgroundOscillators.forEach((oscillator) => {
+      try {
+        oscillator.stop()
+      } catch {
+        // The oscillator may have already ended naturally.
+      }
+      oscillator.disconnect()
+    })
+    this.backgroundOscillators = []
     if (this.backgroundGain && this.backgroundAudioContext) {
       this.backgroundGain.gain.setTargetAtTime(0.0001, this.backgroundAudioContext.currentTime, 0.05)
+      this.backgroundGain.disconnect()
     }
+    this.backgroundGain = null
   }
 
   playClick() {

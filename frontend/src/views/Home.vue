@@ -51,36 +51,24 @@
         <p class="welcome-subtitle">今天想学点什么呢？</p>
       </div>
 
-      <!-- 两个大入口 -->
+      <!-- 主要入口 -->
       <div class="entrance-cards">
         <div
-          class="entrance-card learning-card"
+          v-for="section in homeSections"
+          :key="section.id"
+          class="entrance-card"
+          :class="section.className"
           role="button"
           tabindex="0"
-          aria-label="进入学习乐园"
-          @click="goToLearning"
-          @keydown.enter.prevent="goToLearning"
-          @keydown.space.prevent="goToLearning"
+          :aria-label="`进入${section.title}`"
+          @click="goToSection(section.route)"
+          @keydown.enter.prevent="goToSection(section.route)"
+          @keydown.space.prevent="goToSection(section.route)"
         >
-          <div class="card-icon">📚</div>
-          <h3 class="card-title">学习乐园</h3>
-          <p class="card-desc">认识动物、水果、颜色...</p>
-          <div class="card-badge">8个主题</div>
-        </div>
-
-        <div
-          class="entrance-card game-card"
-          role="button"
-          tabindex="0"
-          aria-label="进入游戏世界"
-          @click="goToGames"
-          @keydown.enter.prevent="goToGames"
-          @keydown.space.prevent="goToGames"
-        >
-          <div class="card-icon">🎮</div>
-          <h3 class="card-title">游戏世界</h3>
-          <p class="card-desc">记忆、拼图、找不同...</p>
-          <div class="card-badge">6种游戏</div>
+          <div class="card-icon">{{ section.icon }}</div>
+          <h3 class="card-title">{{ section.title }}</h3>
+          <p class="card-desc">{{ section.description }}</p>
+          <div class="card-badge">{{ section.badge }}</div>
         </div>
       </div>
 
@@ -108,6 +96,7 @@ import { useRouter } from 'vue-router'
 import { storageManager } from '@/modules/common/utils/storage'
 import { audioManager } from '@/modules/common/utils/audio'
 import { toast } from '@/modules/common/utils/toast'
+import { HOME_SECTIONS } from '@/config/home-content'
 
 const router = useRouter()
 
@@ -118,6 +107,7 @@ const availableStars = ref(0)
 const showUserMenu = ref(false)
 const volume = ref(audioManager.getVolume())
 const backgroundMusicEnabled = ref(audioManager.getBackgroundMusicEnabled())
+const homeSections = HOME_SECTIONS
 
 // 宠物数据（从本地存储加载）
 const showPet = ref(true)
@@ -143,14 +133,9 @@ const loadUserData = () => {
 }
 
 // 导航方法（带音效）
-const goToLearning = () => {
+const goToSection = (route: string) => {
   audioManager.playClick()
-  router.push('/learning')
-}
-
-const goToGames = () => {
-  audioManager.playClick()
-  router.push('/games')
+  router.push(route)
 }
 
 // 喂养宠物（带音效和本地存储）
@@ -352,12 +337,12 @@ const feedPet = () => {
 
 .entrance-cards {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 40px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px;
   margin-bottom: 60px;
 
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
+  @media (max-width: 1080px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -442,6 +427,22 @@ const feedPet = () => {
 
     .card-badge {
       background: #2196F3;
+    }
+  }
+
+  &.song-card {
+    background: linear-gradient(135deg, #FFF3D8 0%, #FFD28A 100%);
+
+    .card-badge {
+      background: #FF9F43;
+    }
+  }
+
+  &.animation-card {
+    background: linear-gradient(135deg, #F0E7FF 0%, #C7B7FF 100%);
+
+    .card-badge {
+      background: #7E57C2;
     }
   }
 }
@@ -615,13 +616,13 @@ const feedPet = () => {
   }
 
   .entrance-cards {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 18px;
   }
 
   .entrance-card {
-    min-height: 210px;
-    padding: 28px 18px;
+    min-height: 190px;
+    padding: 24px 14px;
 
     .card-desc {
       display: none;
@@ -694,6 +695,7 @@ const feedPet = () => {
   }
 
   .entrance-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
     margin-bottom: 12px;
   }
@@ -900,6 +902,104 @@ const feedPet = () => {
   }
 }
 
+@media (orientation: landscape) and (min-width: 1025px) and (max-height: 1100px) {
+  .home-page {
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .header {
+    flex-shrink: 0;
+    padding-top: 10px;
+    padding-bottom: 10px;
+
+    .logo {
+      font-size: 28px;
+    }
+
+    .star-count,
+    .user-avatar {
+      min-height: 50px;
+    }
+  }
+
+  .main-content {
+    flex: 1;
+    min-height: 0;
+    padding-top: 18px;
+    padding-bottom: calc(14px + env(safe-area-inset-bottom));
+    overflow: hidden;
+  }
+
+  .welcome-section {
+    margin-bottom: 16px;
+
+    .welcome-text {
+      margin-bottom: 4px;
+      font-size: 36px;
+    }
+
+    .welcome-subtitle {
+      font-size: 19px;
+    }
+  }
+
+  .entrance-cards {
+    gap: 18px;
+    margin-bottom: 14px;
+  }
+
+  .entrance-card {
+    min-height: 300px;
+    padding: 26px 18px 22px;
+
+    .card-icon {
+      font-size: 76px;
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      margin-bottom: 6px;
+      font-size: 28px;
+    }
+
+    .card-desc {
+      margin-bottom: 10px;
+      font-size: 16px;
+      line-height: 1.25;
+    }
+  }
+
+  .pet-card {
+    max-width: 540px;
+    padding: 14px 18px;
+
+    .pet-avatar {
+      font-size: 46px;
+    }
+
+    .pet-info h4 {
+      margin-bottom: 4px;
+      font-size: 20px;
+    }
+
+    .pet-info .pet-status {
+      flex-direction: row;
+      gap: 12px;
+      font-size: 13px;
+    }
+
+    .btn-feed {
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 16px;
+    }
+  }
+}
+
 @media (orientation: landscape) and (max-height: 430px) {
   .home-page {
     height: 100dvh;
@@ -953,7 +1053,7 @@ const feedPet = () => {
     padding: 8px calc(max(10px, env(safe-area-inset-right)) + 42px) calc(8px + env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
     display: grid;
     grid-template-rows: minmax(0, 1fr) auto;
-    gap: 8px;
+    gap: 6px;
     overflow: hidden;
   }
 
@@ -965,22 +1065,30 @@ const feedPet = () => {
     min-height: 0;
     margin-bottom: 0;
     gap: 10px;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .entrance-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     min-height: 0;
-    padding: 14px 12px;
-    border-radius: 24px;
+    padding: 8px 10px;
+    border-width: 3px;
+    border-radius: 22px;
+    overflow: hidden;
 
     .card-icon {
       margin-bottom: 5px;
-      font-size: clamp(42px, 10vw, 62px);
+      font-size: clamp(36px, 7vw, 48px);
+      line-height: 1;
     }
 
     .card-title {
       margin-bottom: 4px;
-      font-size: clamp(20px, 4vw, 26px);
+      font-size: clamp(17px, 3.1vw, 21px);
+      line-height: 1.08;
     }
 
     .card-desc {
@@ -988,8 +1096,9 @@ const feedPet = () => {
     }
 
     .card-badge {
-      padding: 4px 12px;
-      font-size: 12px;
+      padding: 3px 9px;
+      font-size: 10px;
+      line-height: 1.1;
     }
   }
 
@@ -998,29 +1107,34 @@ const feedPet = () => {
   }
 
   .pet-card {
-    padding: 8px 12px;
-    border-radius: 20px;
-    gap: 10px;
+    min-height: 0;
+    padding: 5px 10px;
+    border-width: 3px;
+    border-radius: 18px;
+    gap: 8px;
 
     .pet-avatar {
-      font-size: 32px;
+      font-size: 28px;
+      line-height: 1;
     }
 
     .pet-info h4 {
       margin-bottom: 2px;
-      font-size: 15px;
+      font-size: 13px;
+      line-height: 1.1;
     }
 
     .pet-info .pet-status {
       flex-direction: row;
       gap: 8px;
-      font-size: 11px;
+      font-size: 10px;
+      line-height: 1.1;
     }
 
     .btn-feed {
-      min-height: 30px;
-      padding: 5px 12px;
-      font-size: 12px;
+      min-height: 26px;
+      padding: 4px 10px;
+      font-size: 11px;
     }
   }
 }

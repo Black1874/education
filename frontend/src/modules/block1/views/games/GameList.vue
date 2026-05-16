@@ -72,7 +72,7 @@ const games = ref([
     emoji: '🧩',
     description: '拼出完整的图案',
     color: 'linear-gradient(135deg, #E0F8F0 0%, #98D8C8 100%)',
-    totalLevels: 15
+    totalLevels: 5
   },
   {
     id: 'difference',

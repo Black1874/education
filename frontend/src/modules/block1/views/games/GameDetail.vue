@@ -1,5 +1,6 @@
 <template>
   <ClassifyGame v-if="gameId === 'classify'" />
+  <PuzzleGame v-else-if="gameId === 'puzzle'" />
 
   <div v-else class="game-detail-page polished-shell">
     <header class="header polished-panel">
@@ -30,6 +31,7 @@
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import ClassifyGame from './ClassifyGame.vue'
+import PuzzleGame from './PuzzleGame.vue'
 import { audioManager } from '@/modules/common/utils/audio'
 
 const router = useRouter()
@@ -39,7 +41,7 @@ const gameId = computed(() => String(route.params.gameId || 'memory'))
 const gameMap: Record<string, { name: string; emoji: string; description: string; totalLevels: number }> = {
   memory: { name: '记忆游戏', emoji: '🧠', description: '记住可爱的图片位置', totalLevels: 15 },
   classify: { name: '分类游戏', emoji: '📦', description: '把相同类型的物品放一起', totalLevels: 5 },
-  puzzle: { name: '拼图游戏', emoji: '🧩', description: '拼出完整的可爱图案', totalLevels: 15 },
+  puzzle: { name: '拼图游戏', emoji: '🧩', description: '拼出完整的可爱图案', totalLevels: 5 },
   difference: { name: '找不同', emoji: '🔍', description: '发现两张图的小变化', totalLevels: 15 },
   matching: { name: '配对游戏', emoji: '💝', description: '找到互相对应的朋友', totalLevels: 15 },
   quick: { name: '快速反应', emoji: '⚡', description: '听提示后点击正确答案', totalLevels: 15 }

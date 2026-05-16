@@ -94,7 +94,7 @@ export const GAME_TYPES = {
     nameEn: 'Puzzle',
     icon: '/icons/puzzle.png',
     color: '#98D8C8',
-    totalLevels: 15,
+    totalLevels: 6,
     description: '拼出完整的图案'
   },
   DIFFERENCE: {

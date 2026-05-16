@@ -339,6 +339,24 @@ class AudioManager {
     oscillator.stop(audioContext.currentTime + 0.4)
   }
 
+  playPuzzleMatch() {
+    if (this.isMuted || this.effectVolume <= 0) return
+    this.playBackgroundMusic()
+    const audioContext = this.getAudioContext()
+    const oscillator = audioContext.createOscillator()
+    const gainNode = audioContext.createGain()
+
+    oscillator.connect(gainNode)
+    gainNode.connect(audioContext.destination)
+    oscillator.frequency.setValueAtTime(660, audioContext.currentTime)
+    oscillator.frequency.exponentialRampToValueAtTime(990, audioContext.currentTime + 0.08)
+    oscillator.type = 'triangle'
+    gainNode.gain.setValueAtTime(this.effectVolume * 0.22, audioContext.currentTime)
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.16)
+    oscillator.start(audioContext.currentTime)
+    oscillator.stop(audioContext.currentTime + 0.16)
+  }
+
   playError() {
     if (this.isMuted || this.effectVolume <= 0) return
     this.playBackgroundMusic()
